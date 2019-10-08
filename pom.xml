@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <groupId>com.iyzico</groupId>
+    <artifactId>iyzico-challenge</artifactId>
+    <version>0.0.1</version>
+    <packaging>pom</packaging>
+    <name>Iyzico Challenge Parent</name>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>payment</module>
+        <module>integrator</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <surefire.forkCount>1</surefire.forkCount>
+        <surefire.reuseForks>true</surefire.reuseForks>
+
+        <iyzipay-java.version>2.0.57</iyzipay-java.version>
+        <junit.version>4.12</junit.version>
+        <spring.boot.version>2.0.0.RELEASE</spring.boot.version>
+    </properties>
+
+    <organization>
+        <name>iyzico</name>
+        <url>https://iyzico.com</url>
+    </organization>
+</project>
