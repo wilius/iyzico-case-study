@@ -69,4 +69,4 @@ $RECYCLE.BIN/
 # Linux generated files
 *~
 .directory
-hsql
+hsql*
