@@ -3,6 +3,8 @@ package com.iyzico.challenge.integrator.data.service;
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.repository.UserRepository;
 import com.iyzico.challenge.integrator.exception.UserNotFoundException;
+import com.iyzico.challenge.integrator.exception.UsernameTakenByAnotherUserException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,4 +40,44 @@ public class UserService {
         }
         return user;
     }
+
+    public Iterable<User> getAllUsers() {
+        return repository.findAll();
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public User createUser(String name, String username, String password, boolean admin) {
+        if (repository.existsByUsername(username)) {
+            throw new UsernameTakenByAnotherUserException(String.format("Username '%s' is taken by another user. Try a different one", username));
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setName(name);
+        user.setPassword(password);
+        user.setAdmin(admin);
+
+        return repository.save(user);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public User updateUser(long id, String name, String password, boolean admin) {
+        User user = getById(id);
+        user.setName(name);
+        user.setAdmin(admin);
+
+        if (!StringUtils.isEmpty(password)) {
+            user.setPassword(password);
+        }
+
+        return repository.save(user);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public void delete(long id) {
+        User user = getById(id);
+        user.setActive(false);
+        repository.save(user);
+    }
 }
+

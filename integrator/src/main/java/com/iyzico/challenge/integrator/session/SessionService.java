@@ -1,8 +1,8 @@
 package com.iyzico.challenge.integrator.session;
 
 import com.iyzico.challenge.integrator.data.entity.User;
-import com.iyzico.challenge.integrator.exception.UserNotFoundException;
 import com.iyzico.challenge.integrator.data.service.UserService;
+import com.iyzico.challenge.integrator.exception.UserNotFoundException;
 import com.iyzico.challenge.integrator.session.model.UserSession;
 import com.iyzico.challenge.integrator.util.IntegrationStringUtils;
 import org.slf4j.Logger;
