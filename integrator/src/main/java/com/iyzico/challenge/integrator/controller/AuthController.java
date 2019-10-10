@@ -1,8 +1,8 @@
 package com.iyzico.challenge.integrator.controller;
 
 import com.iyzico.challenge.integrator.data.entity.User;
-import com.iyzico.challenge.integrator.dto.UserDto;
-import com.iyzico.challenge.integrator.dto.auth.request.LoginRequest;
+import com.iyzico.challenge.integrator.dto.user.UserDto;
+import com.iyzico.challenge.integrator.dto.auth.LoginRequest;
 import com.iyzico.challenge.integrator.mapper.UserMapper;
 import com.iyzico.challenge.integrator.service.AuthService;
 import com.iyzico.challenge.integrator.session.wrapper.ApiSessionRequestWrapper;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.iyzico.challenge.integrator.dto.BadRequestResponse;
 import com.iyzico.challenge.integrator.dto.ErrorCode;
 import com.iyzico.challenge.integrator.exception.BaseIntegratorException;
+import com.iyzico.challenge.integrator.exception.ResourceNotFoundException;
 import com.iyzico.challenge.integrator.exception.auth.AuthorizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,13 @@ public class ErrorAdvice {
         }
 
         return new BadRequestResponse(ErrorCode.INVALID_REQUEST, message);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public BadRequestResponse handle(ResourceNotFoundException e) {
+        return new BadRequestResponse(e.getErrorCode(), e.getMessage());
     }
 
     @ResponseBody

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.8.xsd"
+           xmlns="http://www.hazelcast.com/schema/config"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <group>
+        <name>hzIntegrator</name>
+        <password>hz.integrator</password>
+    </group>
+
+    <partition-group enabled="false"/>
+
+    <properties>
+        <property name="hazelcast.logging.type">slf4j</property>
+        <property name="hazelcast.heartbeat.interval.seconds">2</property>
+        <property name="hazelcast.health.monitoring.level">NOISY</property>
+        <property name="hazelcast.max.no.heartbeat.seconds">30</property>
+    </properties>
+
+    <replicatedmap name="default">
+        <in-memory-format>BINARY</in-memory-format>
+    </replicatedmap>
+
+    <quorum name="quorumRuleWithThreeNodes" enabled="true">
+        <quorum-size>2</quorum-size>
+    </quorum>
+
+    <map name="default">
+        <in-memory-format>BINARY</in-memory-format>
+    </map>
+
+    <network>
+        <port auto-increment="true" port-count="100">18080</port>
+        <interfaces enabled="false"/>
+        <ssl enabled="false"/>
+        <socket-interceptor enabled="false"/>
+        <join>
+            <multicast enabled="false"/>
+            <aws enabled="false"/>
+            <tcp-ip enabled="true">
+                <member-list>
+                    <member>localhost:18080</member>
+                </member-list>
+            </tcp-ip>
+        </join>
+    </network>
+</hazelcast>

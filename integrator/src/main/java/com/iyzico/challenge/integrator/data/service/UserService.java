@@ -19,7 +19,7 @@ public class UserService {
         this.repository = repository;
     }
 
-    @Transactional(readOnly = true, propagation = Propagation.MANDATORY, noRollbackFor = {
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS, noRollbackFor = {
             UserNotFoundException.class
     })
     public User getById(long userId) {
@@ -74,7 +74,7 @@ public class UserService {
     }
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public void delete(long id) {
+    public void inactivate(long id) {
         User user = getById(id);
         user.setActive(false);
         repository.save(user);

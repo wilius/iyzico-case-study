@@ -1,18 +1,16 @@
-package com.iyzico.challenge.integrator.dto;
+package com.iyzico.challenge.integrator.dto.user.request;
 
 import javax.validation.constraints.NotNull;
 
-public class UserDto {
+public class UpdateUserRequest {
     @NotNull
     private long id;
 
     @NotNull
     private String name;
 
-    @NotNull
-    private String username;
+    private String password;
 
-    @NotNull
     private boolean admin;
 
     public long getId() {
@@ -31,12 +29,12 @@ public class UserDto {
         this.name = name;
     }
 
-    public String getUsername() {
-        return username;
+    public String getPassword() {
+        return password;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public boolean isAdmin() {

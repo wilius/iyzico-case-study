@@ -1,4 +1,4 @@
-package com.iyzico.challenge.integrator.dto.auth.request;
+package com.iyzico.challenge.integrator.dto.auth;
 
 import javax.validation.constraints.NotNull;
 

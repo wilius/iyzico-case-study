@@ -3,9 +3,9 @@ package com.iyzico.challenge.integrator.controller.management;
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.service.UserService;
 import com.iyzico.challenge.integrator.dto.ListResponse;
-import com.iyzico.challenge.integrator.dto.UserDto;
-import com.iyzico.challenge.integrator.dto.user.CreateUserRequest;
-import com.iyzico.challenge.integrator.dto.user.UpdateUserRequest;
+import com.iyzico.challenge.integrator.dto.user.UserDto;
+import com.iyzico.challenge.integrator.dto.user.request.CreateUserRequest;
+import com.iyzico.challenge.integrator.dto.user.request.UpdateUserRequest;
 import com.iyzico.challenge.integrator.mapper.UserMapper;
 import com.iyzico.challenge.integrator.session.AdminEndpoint;
 import io.swagger.annotations.ApiOperation;
@@ -48,8 +48,8 @@ public class UserController {
     }
 
     @ApiOperation(
-            value = "Get Users of the Agency",
-            notes = "Gets the users of the agency that the current admin user belongs to"
+            value = "Get All Users",
+            notes = "Gets all the users defined on application"
     )
     @RequestMapping(method = RequestMethod.GET)
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
@@ -68,7 +68,7 @@ public class UserController {
             notes = "Creates a new user"
     )
     @RequestMapping(method = RequestMethod.PUT)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public UserDto create(@RequestBody @Valid CreateUserRequest request) {
         User user = userService.createUser(request.getName(), request.getUsername(), request.getPassword(), request.isAdmin());
         return userMapper.map(user);
@@ -79,19 +79,19 @@ public class UserController {
             notes = "Updates the user which specified by id in request body with the expected parameters"
     )
     @RequestMapping(method = RequestMethod.POST)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public UserDto update(@ModelAttribute("request") @Valid UpdateUserRequest request) {
         User user = userService.updateUser(request.getId(), request.getName(), request.getPassword(), request.isAdmin());
         return userMapper.map(user);
     }
 
     @ApiOperation(
-            value = "Delete User With Id",
-            notes = "Deletes the user with given id that belongs to the same agency"
+            value = "Inactivate User",
+            notes = "Inactivates the user with given id"
     )
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void delete(@PathVariable("id") int id) {
-        userService.delete(id);
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
+    public void inactivate(@PathVariable("id") int id) {
+        userService.inactivate(id);
     }
 }

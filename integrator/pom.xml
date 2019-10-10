@@ -14,6 +14,7 @@
 
     <properties>
         <springfox-swagger-version>2.9.2</springfox-swagger-version>
+        <hazelcast-version>3.12.3</hazelcast-version>
     </properties>
 
     <dependencies>
@@ -27,6 +28,24 @@
                     <artifactId>gson</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-client</artifactId>
+            <version>${hazelcast-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast-version}</version>
         </dependency>
 
         <dependency>
