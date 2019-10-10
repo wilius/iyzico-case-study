@@ -4,8 +4,20 @@ import com.iyzico.challenge.integrator.data.entity.Product;
 import com.iyzico.challenge.integrator.dto.product.ProductDto;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Component
 public class ProductMapper {
+
+    public List<ProductDto> map(Iterable<Product> products) {
+        List<ProductDto> dtos = new LinkedList<>();
+        for (Product product : products) {
+            dtos.add(map(product));
+        }
+
+        return dtos;
+    }
 
     public ProductDto map(Product product) {
         ProductDto dto = new ProductDto();

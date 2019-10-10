@@ -29,6 +29,6 @@ public class IyzicoPaymentServiceTest {
             CompletableFuture<String> future = paymentServiceClients.call(new BigDecimal(i));
             futures.add(future);
         }
-        futures.stream().forEach(f -> CompletableFuture.allOf(f).join());
+        futures.forEach(f -> CompletableFuture.allOf(f).join());
     }
 }

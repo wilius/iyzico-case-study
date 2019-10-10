@@ -15,6 +15,7 @@ public class User {
     private String name;
     private String username;
     private String password;
+    private String lastSessionKey;
     private boolean admin = false;
     private boolean active = true;
 
@@ -57,6 +58,16 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Basic
+    @Column(name = "last_session_key", length = 512)
+    public String getLastSessionKey() {
+        return lastSessionKey;
+    }
+
+    public void setLastSessionKey(String lastSessionKey) {
+        this.lastSessionKey = lastSessionKey;
     }
 
     @Basic

@@ -9,16 +9,20 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
 import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
 
 @Entity
-@Table(name = "product")
+@Table(name = "product", indexes = {
+        @Index(columnList = "status", name = "idx_product___status")
+})
 public class Product {
     private long id;
     private String name;
@@ -115,4 +119,10 @@ public class Product {
     public void setUser(User user) {
         this.user = user;
     }
+
+    @Transient
+    public boolean hasItemToSell() {
+        return stockCount - awaitingDeliveryCount > 0;
+    }
+
 }

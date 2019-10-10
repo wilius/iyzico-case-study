@@ -91,16 +91,22 @@ public class SessionService {
         long userId = user.getId();
         LocalDateTime createdAt = LocalDateTime.now();
         UserSession session = createUserSession(sessionKey, userId, createdAt, createdAt);
+        String lastSessionKey = user.getLastSessionKey();
+        userService.updateLastSessionKey(user, sessionKey);
 
         byte[] keyAsBytes = redisSessionKey.getBytes(StandardCharsets.UTF_8);
         byte[] createdAtBytes = createdAt.toString().getBytes(StandardCharsets.UTF_8);
         byte[] userIdBytes = Long.toString(userId).getBytes(StandardCharsets.UTF_8);
+        byte[] delAsBytes = !StringUtils.isEmpty(lastSessionKey) ? key(lastSessionKey).getBytes(StandardCharsets.UTF_8) : null;
 
         redis.executePipelined((RedisCallback<Object>) connection -> {
             connection.hSet(keyAsBytes, USER_ID_KEY, userIdBytes);
             connection.hSet(keyAsBytes, CREATED_KEY, createdAtBytes);
             connection.hSet(keyAsBytes, LAST_LOGIN_KEY, createdAtBytes);
             connection.expire(keyAsBytes, sessionTTL);
+            if (delAsBytes != null) {
+                connection.del(delAsBytes);
+            }
 
             return null;
         });

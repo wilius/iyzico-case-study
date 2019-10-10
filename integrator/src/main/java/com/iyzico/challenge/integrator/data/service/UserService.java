@@ -79,5 +79,11 @@ public class UserService {
         user.setActive(false);
         repository.save(user);
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
+    public void updateLastSessionKey(User user, String sessionKey) {
+        user.setLastSessionKey(sessionKey);
+        repository.save(user);
+    }
 }
 

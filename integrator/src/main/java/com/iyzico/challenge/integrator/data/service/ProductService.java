@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 @Service
 public class ProductService {
@@ -40,6 +41,16 @@ public class ProductService {
         return product;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    public Iterable<Product> getAllItems() {
+        return repository.findAllByStatusNot(Product.Status.DELETED);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    public Iterable<Product> getAllUnpublishedItems() {
+        return repository.findAllByStatus(Product.Status.UNPUBLISHED);
+    }
+
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
     public Product create(User user, String name, long stockCount, BigDecimal price) {
         Product product = new Product();
@@ -54,8 +65,12 @@ public class ProductService {
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
     public Product update(long id, String name, long stockCount, BigDecimal price) {
-        return lockService.executeInLock("product-" + id, () -> {
+        return execute(id, () -> {
             Product product = getById(id);
+            if (stockCount < product.getAwaitingDeliveryCount()) {
+                // TODO convert it to a known error
+                throw new RuntimeException();
+            }
             product.setName(name);
             product.setStockCount(stockCount);
             product.setPrice(price);
@@ -63,4 +78,33 @@ public class ProductService {
         });
     }
 
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public Product publish(long id) {
+        return execute(id, () -> {
+            Product product = getById(id);
+            updatePublishedProductStatus(product);
+            return repository.save(product);
+        });
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public Product unpublish(long id) {
+        return execute(id, () -> {
+            Product product = getById(id);
+            product.setStatus(Product.Status.UNPUBLISHED);
+            return repository.save(product);
+        });
+    }
+
+    private <T> T execute(long productId, Callable<T> callable) {
+        return lockService.executeInLock("product-" + productId, callable);
+    }
+
+    private void updatePublishedProductStatus(Product product) {
+        if (product.hasItemToSell()) {
+            product.setStatus(Product.Status.IN_STOCK);
+        } else {
+            product.setStatus(Product.Status.OUT_OF_STOCK);
+        }
+    }
 }

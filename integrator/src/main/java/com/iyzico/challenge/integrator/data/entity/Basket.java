@@ -28,7 +28,7 @@ public class Basket {
     private long userId;
     private Status status;
     private BigDecimal total;
-    private LocalDateTime lastActivity;
+    private LocalDateTime createTime;
 
     private User user;
 
@@ -80,12 +80,12 @@ public class Basket {
 
     @Basic
     @Column(name = "last_activity")
-    public LocalDateTime getLastActivity() {
-        return lastActivity;
+    public LocalDateTime getCreateTime() {
+        return createTime;
     }
 
-    public void setLastActivity(LocalDateTime lastActivity) {
-        this.lastActivity = lastActivity;
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
     }
 
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
