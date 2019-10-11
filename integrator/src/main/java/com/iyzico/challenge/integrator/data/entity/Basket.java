@@ -1,6 +1,7 @@
 package com.iyzico.challenge.integrator.data.entity;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,12 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
-import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "basket", indexes = {
@@ -27,10 +26,9 @@ public class Basket {
     private long id;
     private long userId;
     private Status status;
-    private BigDecimal total;
-    private LocalDateTime createTime;
 
     private User user;
+    private Set<BasketProduct> products = new HashSet<>();
 
     public enum Status {
         ACTIVE, TIMEOUT, COMPLETED
@@ -68,26 +66,6 @@ public class Basket {
         this.status = status;
     }
 
-    @Basic
-    @Column(name = "total", precision = DB_PRECISION, scale = DB_SCALE)
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
-    @Basic
-    @Column(name = "last_activity")
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     public User getUser() {
@@ -96,5 +74,14 @@ public class Basket {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @OneToMany(targetEntity = BasketProduct.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "basket", orphanRemoval = true)
+    public Set<BasketProduct> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<BasketProduct> products) {
+        this.products = products;
     }
 }

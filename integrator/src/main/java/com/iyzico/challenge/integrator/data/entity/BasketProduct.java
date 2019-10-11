@@ -10,11 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
-import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
 
 @Entity
 @Table(name = "basket_product")
@@ -22,7 +18,6 @@ public class BasketProduct {
     private long id;
     private long basketId;
     private long productId;
-    private BigDecimal price;
     private int count;
     private LocalDateTime createTime;
 
@@ -58,16 +53,6 @@ public class BasketProduct {
 
     public void setProductId(long productId) {
         this.productId = productId;
-    }
-
-    @Basic
-    @Column(name = "price", precision = DB_PRECISION, scale = DB_SCALE)
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
     }
 
     @Basic

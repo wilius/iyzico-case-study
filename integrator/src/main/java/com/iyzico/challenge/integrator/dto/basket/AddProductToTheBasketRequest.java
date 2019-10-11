@@ -1,4 +1,4 @@
-package com.iyzico.challenge.integrator.dto.selling;
+package com.iyzico.challenge.integrator.dto.basket;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
