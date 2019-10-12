@@ -23,13 +23,13 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @AdminEndpoint
 @RequestMapping("management/product")
-public class ProductController {
+public class ManageProductController {
 
     private final ProductMapper mapper;
     private final ProductService service;
 
-    public ProductController(ProductMapper mapper,
-                             ProductService service) {
+    public ManageProductController(ProductMapper mapper,
+                                   ProductService service) {
         this.mapper = mapper;
         this.service = service;
     }
@@ -42,7 +42,7 @@ public class ProductController {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public ProductDto create(@RequestBody @Validated CreateProductRequest request,
                              @ApiIgnore @IntegratorSession ApiSession session) {
-        return mapper.map(service.create(session.getUser(), request.getName(), request.getStockCount(), request.getPrice()));
+        return mapper.map(service.create(session.getUser(), request.getBarcode(), request.getName(), request.getStockCount(), request.getPrice(), request.getDescription()));
     }
 
     @ApiOperation(
@@ -52,7 +52,7 @@ public class ProductController {
     @RequestMapping(method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public ProductDto update(@RequestBody @Validated UpdateProductRequest request) {
-        return mapper.map(service.update(request.getId(), request.getName(), request.getStockCount(), request.getPrice()));
+        return mapper.map(service.update(request.getId(), request.getBarcode(), request.getName(), request.getStockCount(), request.getPrice(), request.getDescription()));
     }
 
     @ApiOperation(

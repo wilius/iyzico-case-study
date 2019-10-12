@@ -1,17 +1,21 @@
 package com.iyzico.challenge.integrator.data.entity;
 
+import org.hibernate.annotations.Where;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
@@ -20,10 +24,12 @@ import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
 import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
 
 @Entity
-@Table(name = "product", indexes = {
+@Table(name = Product.TABLE_NAME, indexes = {
         @Index(columnList = "status", name = "idx_product___status")
 })
 public class Product {
+    public static final String TABLE_NAME = "product";
+    public static final String DESCRIPTION_COLUMN_NAME = "description";
     private long id;
     private String name;
     private long userId;
@@ -31,11 +37,13 @@ public class Product {
     private long awaitingDeliveryCount;
     private Status status;
     private BigDecimal price;
+    private String barcode;
+    private LongText description;
 
     private User user;
 
     public enum Status {
-        IN_STOCK, OUT_OF_STOCK, UNPUBLISHED, DELETED
+        IN_STOCK, OUT_OF_STOCK, UNPUBLISHED
     }
 
     @Id
@@ -110,6 +118,17 @@ public class Product {
         this.price = price;
     }
 
+    @Basic
+    @Column(name = "barcode", length = 32)
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     public User getUser() {
@@ -118,6 +137,17 @@ public class Product {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @OneToOne(targetEntity = LongText.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id", referencedColumnName = "recordId", foreignKey = @ForeignKey(name = "none"))
+    @Where(clause = " owner_type = 'PRODUCT' and column = 'DESCRIPTION' ")
+    public LongText getDescription() {
+        return description;
+    }
+
+    public void setDescription(LongText description) {
+        this.description = description;
     }
 
     @Transient

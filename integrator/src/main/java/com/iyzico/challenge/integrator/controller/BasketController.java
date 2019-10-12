@@ -1,6 +1,5 @@
 package com.iyzico.challenge.integrator.controller;
 
-import com.iyzico.challenge.integrator.data.entity.Basket;
 import com.iyzico.challenge.integrator.data.service.BasketService;
 import com.iyzico.challenge.integrator.dto.basket.AddProductToTheBasketRequest;
 import com.iyzico.challenge.integrator.dto.basket.BasketDto;
@@ -38,22 +37,22 @@ public class BasketController {
     )
     @RequestMapping(method = RequestMethod.PUT)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
-    public BasketDto add(@RequestBody @Validated AddProductToTheBasketRequest request,
-                         @ApiIgnore @IntegratorSession ApiSession session) {
+    public void add(@RequestBody @Validated AddProductToTheBasketRequest request,
+                    @ApiIgnore @IntegratorSession ApiSession session) {
 
-        Basket basket = service.addItem(session.getUser(), request.getProductId(), request.getCount());
-        return mapper.map(basket);
+        service.addItem(session.getUser(), request.getProductId(), request.getCount());
     }
 
     @ApiOperation(
             value = "Delete from Basket",
             notes = "Deletes given item from the basket"
     )
-    @RequestMapping(name = "/{basketProductId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{basketProductId}", method = RequestMethod.DELETE)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
-    public BasketDto delete(@PathVariable(value = "basketProductId") long productId,
-                            @ApiIgnore @IntegratorSession ApiSession session) {
-        return mapper.map(service.deleteItem(session.getUser(), productId));
+    public void delete(@PathVariable long basketProductId,
+                       @ApiIgnore @IntegratorSession ApiSession session) {
+
+        service.deleteItem(session.getUser(), basketProductId);
     }
 
     @ApiOperation(
@@ -63,7 +62,9 @@ public class BasketController {
     @RequestMapping(method = RequestMethod.GET)
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Throwable.class, readOnly = true)
     public BasketDto get(@ApiIgnore @IntegratorSession ApiSession session) {
-        return mapper.map(service.getByUser(session.getUser()));
+        return mapper.map(
+                service.getByUser(session.getUser())
+        );
     }
 
 }

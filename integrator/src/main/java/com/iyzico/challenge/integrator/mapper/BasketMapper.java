@@ -35,11 +35,4 @@ public class BasketMapper {
         dto.setProducts(products);
         return dto;
     }
-
-    public BasketProductDto map(BasketProduct product) {
-        BasketProductDto dto = new BasketProductDto();
-        dto.setCount(product.getCount());
-        dto.setProduct(productMapper.map(product.getProduct()));
-        return dto;
-    }
 }

@@ -1,10 +1,12 @@
 package com.iyzico.challenge.integrator.data.service;
 
+import com.iyzico.challenge.integrator.data.entity.LongText;
 import com.iyzico.challenge.integrator.data.entity.Product;
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.repository.ProductRepository;
 import com.iyzico.challenge.integrator.exception.ProductNotFoundException;
 import com.iyzico.challenge.integrator.service.hazelcast.LockService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +35,12 @@ public class ProductService {
             throw new ProductNotFoundException(String.format("Product with id %s not found", productId));
         }
 
-        Product product = result.get();
-        if (Product.Status.DELETED.equals(product.getStatus())) {
-            throw new ProductNotFoundException(String.format("Product with id %s not found", productId));
-        }
-
-        return product;
+        return result.get();
     }
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     public Iterable<Product> getAllItems() {
-        return repository.findAllByStatusNot(Product.Status.DELETED);
+        return repository.findAll();
     }
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -51,27 +48,56 @@ public class ProductService {
         return repository.findAllByStatus(Product.Status.UNPUBLISHED);
     }
 
+    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = Throwable.class, readOnly = true)
+    public Product getPublishedItem(long id) {
+        Product product = getById(id);
+        if (Product.Status.UNPUBLISHED.equals(product.getStatus())) {
+            throw new ProductNotFoundException(String.format("Product with id %s not found", id));
+        }
+
+        return product;
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = Throwable.class, readOnly = true)
+    public Iterable<Product> getAllPublishedItems() {
+        return repository.findAllByStatusNot(Product.Status.UNPUBLISHED);
+    }
+
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public Product create(User user, String name, long stockCount, BigDecimal price) {
+    public Product create(User user, String barcode, String name, long stockCount, BigDecimal price, String description) {
         Product product = new Product();
         product.setName(name);
+        product.setBarcode(barcode);
         product.setStatus(Product.Status.UNPUBLISHED);
         product.setStockCount(stockCount);
         product.setUser(user);
         product.setPrice(price);
         product.setAwaitingDeliveryCount(0);
-        return repository.save(product);
+
+        product = repository.saveAndFlush(product);
+        if (StringUtils.isNotEmpty(description)) {
+            LongText desc = new LongText();
+            desc.setTable(Product.TABLE_NAME);
+            desc.setColumn(Product.DESCRIPTION_COLUMN_NAME);
+            desc.setRecordId(String.valueOf(product.getId()));
+            desc.setContent(description);
+            product.setDescription(desc);
+        }
+
+        return product;
     }
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public Product update(long id, String name, long stockCount, BigDecimal price) {
+    public Product update(long id, String barcode, String name, long stockCount, BigDecimal price, String description) {
         return execute(id, () -> {
             Product product = getById(id);
             if (stockCount < product.getAwaitingDeliveryCount()) {
                 // TODO convert it to a known error
                 throw new RuntimeException();
             }
+
             product.setName(name);
+            product.setBarcode(barcode);
             product.setStockCount(stockCount);
             product.setPrice(price);
             return repository.save(product);

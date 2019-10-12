@@ -1,10 +1,12 @@
 package com.iyzico.challenge.integrator.controller;
 
 import com.iyzico.challenge.integrator.data.entity.User;
-import com.iyzico.challenge.integrator.dto.user.UserDto;
 import com.iyzico.challenge.integrator.dto.auth.LoginRequest;
+import com.iyzico.challenge.integrator.dto.user.UserDto;
 import com.iyzico.challenge.integrator.mapper.UserMapper;
 import com.iyzico.challenge.integrator.service.AuthService;
+import com.iyzico.challenge.integrator.session.annotation.IntegratorSession;
+import com.iyzico.challenge.integrator.session.model.ApiSession;
 import com.iyzico.challenge.integrator.session.wrapper.ApiSessionRequestWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,5 +39,11 @@ public class AuthController {
         User user = authService.getUser(request.getUsername(), request.getPassword());
         sessionRequest.createSession(user);
         return userMapper.map(user);
+    }
+
+    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logout(@ApiIgnore @IntegratorSession ApiSession session) {
+        session.invalidate();
     }
 }

@@ -1,17 +1,23 @@
 package com.iyzico.challenge.integrator.dto.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.math.BigDecimal;
 
 public class ProductDto {
     private long id;
+    private String barcode;
     private String name;
     private long stockCount;
     private long awaitingDeliveryCount;
     private Status status;
     private BigDecimal price;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String description;
+
     public enum Status {
-        IN_STOCK, OUT_OF_STOCK, UNPUBLISHED, DELETED
+        IN_STOCK, OUT_OF_STOCK, UNPUBLISHED
     }
 
     public long getId() {
@@ -20,6 +26,14 @@ public class ProductDto {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
 
     public String getName() {
@@ -60,5 +74,13 @@ public class ProductDto {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

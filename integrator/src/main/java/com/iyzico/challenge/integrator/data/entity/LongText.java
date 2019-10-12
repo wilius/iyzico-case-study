@@ -14,7 +14,8 @@ import javax.persistence.Table;
 public class LongText {
     private long id;
     private String table;
-    private String type;
+    private String column;
+    private String recordId;
     private String content;
 
     @Id
@@ -39,17 +40,27 @@ public class LongText {
     }
 
     @Basic
-    @Column(name = "type", length = 128)
-    public String getType() {
-        return type;
+    @Column(name = "column", length = 128)
+    public String getColumn() {
+        return column;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setColumn(String column) {
+        this.column = column;
+    }
+
+    @Basic
+    @Column(name = "recordId", length = 64)
+    public String getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
     }
 
     @Lob
-    @Column(name = "content", length = 128)
+    @Column(name = "content")
     public String getContent() {
         return content;
     }

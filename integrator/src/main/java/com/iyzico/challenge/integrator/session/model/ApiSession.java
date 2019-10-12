@@ -17,7 +17,6 @@ public class ApiSession implements HttpSession {
     private final static String HEADER_SESSION_SET = "Set-Session";
     private final static String HEADER_SESSION_DEL = "Del-Session";
 
-
     private final static DeprecatedHttpSessionContext sessionContext = new DeprecatedHttpSessionContext();
 
     private final ServletContext servletContext;
@@ -31,9 +30,7 @@ public class ApiSession implements HttpSession {
 
         if (setSessionHeader) {
             response.addHeader(HEADER_SESSION_SET, userSession.getSessionKey());
-            Cookie sessionCookie = new Cookie(HEADER_SESSION_KEY, userSession.getSessionKey());
-            sessionCookie.setPath("/");
-            response.addCookie(sessionCookie);
+            response.addCookie(createSessionCookie());
         }
     }
 
@@ -141,6 +138,9 @@ public class ApiSession implements HttpSession {
     @Override
     public void invalidate() {
         response.addHeader(ApiSession.HEADER_SESSION_DEL, userSession.getSessionKey());
+        Cookie cookie = createSessionCookie();
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
         userSession.invalidate();
     }
 
@@ -151,6 +151,12 @@ public class ApiSession implements HttpSession {
 
     public UserSession getUserSession() {
         return userSession;
+    }
+
+    private Cookie createSessionCookie() {
+        Cookie sessionCookie = new Cookie(HEADER_SESSION_KEY, userSession.getSessionKey());
+        sessionCookie.setPath("/");
+        return sessionCookie;
     }
 
     private static class DeprecatedHttpSessionContext implements HttpSessionContext {
