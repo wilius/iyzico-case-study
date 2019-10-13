@@ -70,7 +70,7 @@ public class UserController {
     @RequestMapping(method = RequestMethod.PUT)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public UserDto create(@RequestBody @Valid CreateUserRequest request) {
-        User user = userService.createUser(request.getName(), request.getUsername(), request.getPassword(), request.isAdmin());
+        User user = userService.createUser(request);
         return userMapper.map(user);
     }
 
@@ -81,7 +81,7 @@ public class UserController {
     @RequestMapping(method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public UserDto update(@ModelAttribute("request") @Valid UpdateUserRequest request) {
-        User user = userService.updateUser(request.getId(), request.getName(), request.getPassword(), request.isAdmin());
+        User user = userService.updateUser(request.getId(), request.getPassword(), request.isAdmin());
         return userMapper.map(user);
     }
 

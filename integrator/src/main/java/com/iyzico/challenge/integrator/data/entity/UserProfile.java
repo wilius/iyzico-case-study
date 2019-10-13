@@ -1,77 +1,42 @@
-package com.iyzico.challenge.integrator.dto.user.request;
+package com.iyzico.challenge.integrator.data.entity;
 
-import com.iyzico.challenge.integrator.dto.user.validator.Country;
-import com.iyzico.challenge.integrator.dto.user.validator.PhoneNumber;
-import org.hibernate.validator.constraints.Length;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-
-public class CreateUserRequest {
-
-    @NotNull
-    @Length(min = 3)
-    private String username;
-
-    @NotNull
-    @Length(min = 4)
-    private String password;
-
-    @NotNull
-    @Length(min = 3)
+@Entity
+@Table(name = "user_profile")
+public class UserProfile {
+    private long id;
     private String name;
-
-    @NotNull
-    @Length(min = 2)
     private String surname;
-
-    @NotNull
-    @Length(min = 5)
     private String identityNo;
-
-    @NotNull
-    @Length(min = 2)
     private String city;
-
-    @NotNull
-    @Length(min = 2, max = 3)
-    @Country
     private String country;
-
-    @NotNull
-    @Email
     private String email;
-
-    @NotNull
-    @PhoneNumber
     private String phoneNumber;
-
-    @NotNull
-    @Length(min = 10)
     private String address;
-
-    @NotNull
-    @Length(min = 3)
     private String zipCode;
+    private LocalDateTime registrationDate;
 
-    private boolean admin = false;
-
-    public String getUsername() {
-        return username;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    public long getId() {
+        return id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
+    @Basic
+    @Column(name = "name", length = 512)
     public String getName() {
         return name;
     }
@@ -80,6 +45,8 @@ public class CreateUserRequest {
         this.name = name;
     }
 
+    @Basic
+    @Column(name = "surname", length = 512)
     public String getSurname() {
         return surname;
     }
@@ -88,6 +55,8 @@ public class CreateUserRequest {
         this.surname = surname;
     }
 
+    @Basic
+    @Column(name = "identity_no", length = 64)
     public String getIdentityNo() {
         return identityNo;
     }
@@ -96,6 +65,8 @@ public class CreateUserRequest {
         this.identityNo = identityNo;
     }
 
+    @Basic
+    @Column(name = "city", length = 64)
     public String getCity() {
         return city;
     }
@@ -104,6 +75,8 @@ public class CreateUserRequest {
         this.city = city;
     }
 
+    @Basic
+    @Column(name = "country", length = 3)
     public String getCountry() {
         return country;
     }
@@ -112,6 +85,8 @@ public class CreateUserRequest {
         this.country = country;
     }
 
+    @Basic
+    @Column(name = "email", length = 128)
     public String getEmail() {
         return email;
     }
@@ -120,6 +95,8 @@ public class CreateUserRequest {
         this.email = email;
     }
 
+    @Basic
+    @Column(name = "phone_number", length = 16)
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -128,6 +105,8 @@ public class CreateUserRequest {
         this.phoneNumber = phoneNumber;
     }
 
+    @Basic
+    @Column(name = "address", length = 512)
     public String getAddress() {
         return address;
     }
@@ -136,6 +115,8 @@ public class CreateUserRequest {
         this.address = address;
     }
 
+    @Basic
+    @Column(name = "zip_code", length = 16)
     public String getZipCode() {
         return zipCode;
     }
@@ -144,11 +125,13 @@ public class CreateUserRequest {
         this.zipCode = zipCode;
     }
 
-    public boolean isAdmin() {
-        return admin;
+    @Basic
+    @Column(name = "registration_date")
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
     }
 }

@@ -11,3 +11,7 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: update
+iyzico:
+  base-url: https://sandbox-api.iyzipay.com
+  api-key: sandbox-wP19ADAs7HEf8fVEQpysbT78V8kC6ZGO
+  secret-key: sandbox-5Rk3intHwG3dB7ynWLKrzsTBHgNF4P0N

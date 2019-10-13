@@ -4,7 +4,6 @@ import com.iyzico.challenge.integrator.data.entity.Basket;
 import com.iyzico.challenge.integrator.data.entity.BasketProduct;
 import com.iyzico.challenge.integrator.data.entity.Product;
 import com.iyzico.challenge.integrator.data.entity.User;
-import com.iyzico.challenge.integrator.data.repository.BasketProductRepository;
 import com.iyzico.challenge.integrator.data.repository.BasketRepository;
 import com.iyzico.challenge.integrator.service.hazelcast.LockService;
 import org.springframework.stereotype.Service;
@@ -15,23 +14,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Iterator;
 
 @Service
 public class BasketService {
     private final BasketRepository repository;
-    private final BasketProductRepository basketProductRepository;
 
     private final ProductService productService;
     private final TransactionTemplate requireNewTransactionTemplate;
     private final LockService lockService;
 
     public BasketService(BasketRepository repository,
-                         BasketProductRepository basketProductRepository,
                          ProductService productService,
                          PlatformTransactionManager transactionManager,
                          LockService lockService) {
         this.repository = repository;
-        this.basketProductRepository = basketProductRepository;
         this.productService = productService;
         this.lockService = lockService;
 
@@ -41,35 +38,52 @@ public class BasketService {
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
     public void addItem(User user, long productId, int count) {
-        Product product = productService.getPublishedItem(productId);
-        if (!Product.Status.IN_STOCK.equals(product.getStatus())) {
-            // TODO
-            throw new RuntimeException("Invalid Status");
-        }
+        lockService.executeInBasketLock(user, () -> {
+            Product product = productService.getPublishedItem(productId);
+            if (!Product.Status.IN_STOCK.equals(product.getStatus())) {
+                // TODO
+                throw new RuntimeException("Invalid Status");
+            }
 
-        if (product.getStockCount() < count) {
-            // TODO
-            throw new RuntimeException("Over stock count");
-        }
+            if (product.getStockCount() < count) {
+                // TODO
+                throw new RuntimeException("Over stock count");
+            }
 
-        Basket basket = getUserBasket(user);
-        BasketProduct basketProduct = new BasketProduct();
-        basketProduct.setBasket(basket);
-        basketProduct.setProduct(product);
-        basketProduct.setCount(count);
-        basketProduct.setCreateTime(LocalDateTime.now());
-        basketProductRepository.save(basketProduct);
+            Basket basket = getUserBasket(user, true);
+            for (BasketProduct basketProduct : basket.getProducts()) {
+                if (basketProduct.getProductId() == productId) {
+                    basketProduct.setCount(basketProduct.getCount() + count);
+                    return repository.save(basket);
+                }
+            }
+
+            BasketProduct basketProduct = new BasketProduct();
+            basketProduct.setBasket(basket);
+            basketProduct.setProduct(product);
+            basketProduct.setCount(count);
+            basketProduct.setCreateTime(LocalDateTime.now());
+
+            basket.getProducts().add(basketProduct);
+            return repository.save(basket);
+        });
     }
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
     public void deleteItem(User user, long basketProductId) {
-        Basket basket = getUserBasket(user);
-        for (BasketProduct next : basket.getProducts()) {
-            if (next.getId() == basketProductId) {
-                basketProductRepository.delete(next);
-                break;
+        lockService.executeInBasketLock(user, () -> {
+            Basket basket = getUserBasket(user);
+            Iterator<BasketProduct> iterator = basket.getProducts().iterator();
+            while (iterator.hasNext()) {
+                BasketProduct next = iterator.next();
+                if (next.getId() == basketProductId) {
+                    iterator.remove();
+                    return repository.save(basket);
+                }
             }
-        }
+
+            return basket;
+        });
     }
 
     public Basket getByUser(User user) {

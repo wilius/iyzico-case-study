@@ -2,6 +2,7 @@ package com.iyzico.challenge.integrator.dto.product.request;
 
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class CreateProductRequest {
 
     @Min(0)
     @NotNull
+    @Digits(integer = 32, fraction = 2)
     private BigDecimal price;
 
     @NotNull

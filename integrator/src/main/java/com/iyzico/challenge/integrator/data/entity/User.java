@@ -1,23 +1,31 @@
 package com.iyzico.challenge.integrator.data.entity;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
 public class User {
     private long id;
-    private String name;
+    private long userProfileId;
     private String username;
     private String password;
+    private LocalDateTime lastLoginDate;
     private String lastSessionKey;
     private boolean admin = false;
     private boolean active = true;
+
+    private UserProfile profile;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,16 +36,6 @@ public class User {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    @Basic
-    @Column(name = "name", length = 512)
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Basic
@@ -58,6 +56,26 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Basic
+    @Column(name = "user_profile_id", insertable = false, updatable = false)
+    public long getUserProfileId() {
+        return userProfileId;
+    }
+
+    public void setUserProfileId(long userProfileId) {
+        this.userProfileId = userProfileId;
+    }
+
+    @Basic
+    @Column(name = "last_login_date")
+    public LocalDateTime getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(LocalDateTime lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
     }
 
     @Basic
@@ -88,5 +106,15 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    @OneToOne(targetEntity = UserProfile.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_profile_id", referencedColumnName = "id")
+    public UserProfile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(UserProfile profile) {
+        this.profile = profile;
     }
 }

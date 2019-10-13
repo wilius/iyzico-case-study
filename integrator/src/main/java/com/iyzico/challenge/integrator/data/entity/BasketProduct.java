@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -93,5 +95,10 @@ public class BasketProduct {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    @Transient
+    public BigDecimal getSubtotal() {
+        return getProduct().getPrice().multiply(new BigDecimal(count));
     }
 }

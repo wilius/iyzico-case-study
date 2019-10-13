@@ -6,9 +6,6 @@ public class UpdateUserRequest {
     @NotNull
     private long id;
 
-    @NotNull
-    private String name;
-
     private String password;
 
     private boolean admin;
@@ -19,14 +16,6 @@ public class UpdateUserRequest {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPassword() {

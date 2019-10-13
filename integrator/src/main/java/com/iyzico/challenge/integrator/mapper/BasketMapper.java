@@ -6,7 +6,6 @@ import com.iyzico.challenge.integrator.dto.basket.BasketDto;
 import com.iyzico.challenge.integrator.dto.basket.BasketProductDto;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,18 +19,18 @@ public class BasketMapper {
 
     public BasketDto map(Basket basket) {
         BasketDto dto = new BasketDto();
-        BigDecimal total = BigDecimal.ZERO;
         List<BasketProductDto> products = new ArrayList<>(basket.getProducts().size());
         for (BasketProduct product : basket.getProducts()) {
             BasketProductDto productDto = new BasketProductDto();
             productDto.setId(product.getId());
             productDto.setCount(product.getCount());
             productDto.setProduct(productMapper.map(product.getProduct()));
-            total = total.add(product.getProduct().getPrice());
+
+            productDto.setSubtotal(product.getSubtotal());
             products.add(productDto);
         }
 
-        dto.setTotal(total);
+        dto.setTotal(basket.getTotal());
         dto.setProducts(products);
         return dto;
     }

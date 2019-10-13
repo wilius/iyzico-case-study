@@ -22,12 +22,6 @@
             <groupId>com.iyzipay</groupId>
             <artifactId>iyzipay-java</artifactId>
             <version>${iyzipay-java.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.code.gson</groupId>
-                    <artifactId>gson</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -103,6 +97,12 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
             <version>${springfox-swagger-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>8.10.13</version>
         </dependency>
     </dependencies>
 

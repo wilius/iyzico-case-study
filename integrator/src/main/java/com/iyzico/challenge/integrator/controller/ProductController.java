@@ -4,7 +4,7 @@ import com.iyzico.challenge.integrator.data.service.ProductService;
 import com.iyzico.challenge.integrator.dto.ListResponse;
 import com.iyzico.challenge.integrator.dto.product.ProductDto;
 import com.iyzico.challenge.integrator.mapper.ProductMapper;
-import com.iyzico.challenge.integrator.session.AdminEndpoint;
+import com.iyzico.challenge.integrator.session.SecuredEndpoint;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@AdminEndpoint
+@SecuredEndpoint
 @RequestMapping("product")
 public class ProductController {
     private final ProductMapper mapper;

@@ -15,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -83,5 +85,12 @@ public class Basket {
 
     public void setProducts(Set<BasketProduct> products) {
         this.products = products;
+    }
+
+    @Transient
+    public BigDecimal getTotal() {
+        return products.stream()
+                .map(BasketProduct::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

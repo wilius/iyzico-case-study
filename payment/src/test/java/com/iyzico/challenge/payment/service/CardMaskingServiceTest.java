@@ -1,5 +1,6 @@
 package com.iyzico.challenge.payment.service;
 
+import com.iyzico.challenge.payment.properties.CardValidationProperties;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ public class CardMaskingServiceTest {
 
     @Before
     public void setUp() {
-        cardMaskingService = new CardMaskingService(null);
+        cardMaskingService = new CardMaskingService(new CardValidationProperties());
     }
 
     @Test

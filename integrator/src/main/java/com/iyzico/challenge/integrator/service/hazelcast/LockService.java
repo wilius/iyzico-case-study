@@ -2,6 +2,8 @@ package com.iyzico.challenge.integrator.service.hazelcast;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.iyzico.challenge.integrator.data.entity.User;
+import com.iyzico.challenge.integrator.exception.BaseIntegratorException;
 import com.iyzico.challenge.integrator.service.hazelcast.exception.CannotHoldTheLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,10 @@ public class LockService {
         lockMap = hazelcast.getMap("integrator.lock.map");
     }
 
+    public <T> T executeInBasketLock(User user, Callable<T> callable) {
+        return executeInLock("basket-lock:" + user.getId(), callable);
+    }
+
     public <T> T executeInLock(String key, Callable<T> task) {
         boolean locked = false;
         BLock lock = null;
@@ -32,10 +38,19 @@ public class LockService {
                 return task.call();
             }
         } catch (Throwable e) {
+            if (e instanceof BaseIntegratorException) {
+                throw (BaseIntegratorException) e;
+            }
+
+            if (e.getCause() instanceof BaseIntegratorException) {
+                throw (BaseIntegratorException) e.getCause();
+            }
+
+            throw new CannotHoldTheLockException(e);
+        } finally {
             if (locked) {
                 lock.unlock();
             }
-            throw new CannotHoldTheLockException(e);
         }
 
         logger.trace("Cannot hold the lock for key '{}'", key);

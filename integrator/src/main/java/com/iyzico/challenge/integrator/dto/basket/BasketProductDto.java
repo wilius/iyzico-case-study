@@ -2,9 +2,12 @@ package com.iyzico.challenge.integrator.dto.basket;
 
 import com.iyzico.challenge.integrator.dto.product.ProductDto;
 
+import java.math.BigDecimal;
+
 public class BasketProductDto {
     private long id;
     private int count;
+    private BigDecimal subtotal;
     private ProductDto product;
 
     public long getId() {
@@ -21,6 +24,14 @@ public class BasketProductDto {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(BigDecimal total) {
+        this.subtotal = total;
     }
 
     public ProductDto getProduct() {

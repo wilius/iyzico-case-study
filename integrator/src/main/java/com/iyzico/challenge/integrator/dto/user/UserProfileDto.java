@@ -1,76 +1,18 @@
-package com.iyzico.challenge.integrator.dto.user.request;
+package com.iyzico.challenge.integrator.dto.user;
 
-import com.iyzico.challenge.integrator.dto.user.validator.Country;
-import com.iyzico.challenge.integrator.dto.user.validator.PhoneNumber;
-import org.hibernate.validator.constraints.Length;
+import java.time.LocalDateTime;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-
-public class CreateUserRequest {
-
-    @NotNull
-    @Length(min = 3)
-    private String username;
-
-    @NotNull
-    @Length(min = 4)
-    private String password;
-
-    @NotNull
-    @Length(min = 3)
+public class UserProfileDto {
     private String name;
-
-    @NotNull
-    @Length(min = 2)
     private String surname;
-
-    @NotNull
-    @Length(min = 5)
     private String identityNo;
-
-    @NotNull
-    @Length(min = 2)
     private String city;
-
-    @NotNull
-    @Length(min = 2, max = 3)
-    @Country
     private String country;
-
-    @NotNull
-    @Email
     private String email;
-
-    @NotNull
-    @PhoneNumber
     private String phoneNumber;
-
-    @NotNull
-    @Length(min = 10)
     private String address;
-
-    @NotNull
-    @Length(min = 3)
     private String zipCode;
-
-    private boolean admin = false;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    private LocalDateTime registrationDate;
 
     public String getName() {
         return name;
@@ -144,11 +86,11 @@ public class CreateUserRequest {
         this.zipCode = zipCode;
     }
 
-    public boolean isAdmin() {
-        return admin;
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
     }
 }

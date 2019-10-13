@@ -7,9 +7,6 @@ public class UserDto {
     private long id;
 
     @NotNull
-    private String name;
-
-    @NotNull
     private String username;
 
     @NotNull
@@ -17,6 +14,8 @@ public class UserDto {
 
     @NotNull
     private boolean active;
+    
+    private UserProfileDto profile;
 
     public long getId() {
         return id;
@@ -24,14 +23,6 @@ public class UserDto {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getUsername() {
@@ -56,5 +47,13 @@ public class UserDto {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void setProfile(UserProfileDto profile) {
+        this.profile = profile;
+    }
+
+    public UserProfileDto getProfile() {
+        return profile;
     }
 }

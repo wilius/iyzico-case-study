@@ -18,11 +18,14 @@ import java.util.concurrent.Callable;
 @Service
 public class ProductService {
     private final ProductRepository repository;
+    private final LongTextService longTextService;
     private final LockService lockService;
 
     public ProductService(ProductRepository repository,
+                          LongTextService longTextService,
                           LockService lockService) {
         this.repository = repository;
+        this.longTextService = longTextService;
         this.lockService = lockService;
     }
 
@@ -76,11 +79,12 @@ public class ProductService {
 
         product = repository.saveAndFlush(product);
         if (StringUtils.isNotEmpty(description)) {
-            LongText desc = new LongText();
-            desc.setTable(Product.TABLE_NAME);
-            desc.setColumn(Product.DESCRIPTION_COLUMN_NAME);
-            desc.setRecordId(String.valueOf(product.getId()));
-            desc.setContent(description);
+            LongText desc = longTextService.create(
+                    Product.TABLE_NAME,
+                    Product.DESCRIPTION_COLUMN_NAME,
+                    String.valueOf(product.getId()),
+                    description);
+
             product.setDescription(desc);
         }
 

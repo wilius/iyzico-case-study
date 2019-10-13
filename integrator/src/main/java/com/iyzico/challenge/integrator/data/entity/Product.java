@@ -18,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Min;
 import java.math.BigDecimal;
 
 import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
@@ -34,7 +35,8 @@ public class Product {
     private String name;
     private long userId;
     private long stockCount;
-    private long awaitingDeliveryCount;
+    private long awaitingDeliveryCount = 0;
+    private long blockedCount = 0;
     private Status status;
     private BigDecimal price;
     private String barcode;
@@ -78,6 +80,7 @@ public class Product {
     }
 
     @Basic
+    @Min(0)
     @Column(name = "stock_count")
     public long getStockCount() {
         return stockCount;
@@ -88,6 +91,7 @@ public class Product {
     }
 
     @Basic
+    @Min(0)
     @Column(name = "awaiting_delivery_count")
     public long getAwaitingDeliveryCount() {
         return awaitingDeliveryCount;
@@ -95,6 +99,17 @@ public class Product {
 
     public void setAwaitingDeliveryCount(long awaitingDeliveryCount) {
         this.awaitingDeliveryCount = awaitingDeliveryCount;
+    }
+
+    @Basic
+    @Min(0)
+    @Column(name = "blocked_count")
+    public long getBlockedCount() {
+        return blockedCount;
+    }
+
+    public void setBlockedCount(long blockedCount) {
+        this.blockedCount = blockedCount;
     }
 
     @Basic
