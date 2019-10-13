@@ -6,6 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface BasketRepository extends CrudRepository<Basket, Long> {
     Basket findFirstByUserIdAndStatus(long userId, Basket.Status status);
@@ -18,4 +20,15 @@ public interface BasketRepository extends CrudRepository<Basket, Long> {
             "   and b.status = :status ")
     Basket findFirstByUserIdAndStatusWithBasketContent(@Param("userId") long userId,
                                                        @Param("status") Basket.Status status);
+
+    @Query("" +
+            " select " +
+            "   p.productId " +
+            " from Basket b " +
+            "   join b.products p" +
+            " where b.userId = :userId " +
+            "   and b.status = :status " +
+            " order by p.productId ")
+    List<Long> getBasketProductIds(@Param("userId") long userId,
+                                   @Param("status") Basket.Status status);
 }

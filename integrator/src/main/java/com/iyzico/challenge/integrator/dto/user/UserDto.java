@@ -14,7 +14,7 @@ public class UserDto {
 
     @NotNull
     private boolean active;
-    
+
     private UserProfileDto profile;
 
     public long getId() {

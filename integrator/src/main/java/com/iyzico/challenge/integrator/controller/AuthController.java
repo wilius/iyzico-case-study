@@ -38,6 +38,7 @@ public class AuthController {
                          @ApiIgnore ApiSessionRequestWrapper sessionRequest) {
         User user = authService.getUser(request.getUsername(), request.getPassword());
         sessionRequest.createSession(user);
+        authService.markAsLoggedIn(user, sessionRequest.getRequestedSessionId());
         return userMapper.map(user);
     }
 

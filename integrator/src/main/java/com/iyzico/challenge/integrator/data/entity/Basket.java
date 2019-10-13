@@ -28,12 +28,13 @@ public class Basket {
     private long id;
     private long userId;
     private Status status;
+    private BigDecimal total = null;
 
     private User user;
     private Set<BasketProduct> products = new HashSet<>();
 
     public enum Status {
-        ACTIVE, TIMEOUT, COMPLETED
+        ACTIVE, STOCK_APPLIED, TIMEOUT, COMPLETED
     }
 
     @Id
@@ -48,7 +49,7 @@ public class Basket {
     }
 
     @Basic
-    @Column(name = "user_id", insertable = false, updatable = false)
+    @Column(name = "user_id", insertable = false, updatable = false, nullable = false)
     public long getUserId() {
         return userId;
     }
@@ -58,7 +59,7 @@ public class Basket {
     }
 
     @Basic
-    @Column(name = "status", length = 16)
+    @Column(name = "status", length = 16, nullable = false)
     @Enumerated(EnumType.STRING)
     public Status getStatus() {
         return status;
@@ -89,8 +90,18 @@ public class Basket {
 
     @Transient
     public BigDecimal getTotal() {
-        return products.stream()
-                .map(BasketProduct::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (total != null) {
+            return total;
+        }
+
+        synchronized (this) {
+            if (total != null) {
+                return total;
+            }
+
+            return total = products.stream()
+                    .map(BasketProduct::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
     }
 }

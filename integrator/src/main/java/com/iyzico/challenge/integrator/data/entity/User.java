@@ -39,7 +39,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "username", length = 64)
+    @Column(name = "username", length = 64, nullable = false)
     public String getUsername() {
         return username;
     }
@@ -49,7 +49,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "password", length = 512)
+    @Column(name = "password", length = 512, nullable = false)
     public String getPassword() {
         return password;
     }
@@ -59,7 +59,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "user_profile_id", insertable = false, updatable = false)
+    @Column(name = "user_profile_id", insertable = false, updatable = false, nullable = false)
     public long getUserProfileId() {
         return userProfileId;
     }
@@ -89,7 +89,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "admin")
+    @Column(name = "admin", nullable = false)
     public boolean isAdmin() {
         return admin;
     }
@@ -99,7 +99,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     public boolean isActive() {
         return active;
     }

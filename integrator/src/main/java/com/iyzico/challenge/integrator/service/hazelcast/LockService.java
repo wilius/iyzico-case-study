@@ -37,16 +37,20 @@ public class LockService {
                 locked = true;
                 return task.call();
             }
+        } catch (InterruptedException e) {
+            throw new CannotHoldTheLockException(e);
+        } catch (BaseIntegratorException e) {
+            throw e;
         } catch (Throwable e) {
-            if (e instanceof BaseIntegratorException) {
-                throw (BaseIntegratorException) e;
-            }
-
             if (e.getCause() instanceof BaseIntegratorException) {
                 throw (BaseIntegratorException) e.getCause();
             }
 
-            throw new CannotHoldTheLockException(e);
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+
+            throw new RuntimeException(e);
         } finally {
             if (locked) {
                 lock.unlock();
@@ -57,14 +61,7 @@ public class LockService {
         throw new CannotHoldTheLockException(String.format("Unable to acquire lock with key %s in the maximum wait time.", key));
     }
 
-    public void executeInLockWithoutResult(String key, Runnable task) {
-        executeInLock(key, () -> {
-            task.run();
-            return null;
-        });
-    }
-
-    public BLock getLock(String lockName) {
+    private BLock getLock(String lockName) {
         return new BLock() {
             @Override
             public boolean isLocked() {

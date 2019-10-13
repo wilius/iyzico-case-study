@@ -60,7 +60,7 @@ public class Product {
     }
 
     @Basic
-    @Column(name = "name", length = 512)
+    @Column(name = "name", length = 512, nullable = false)
     public String getName() {
         return name;
     }
@@ -70,7 +70,7 @@ public class Product {
     }
 
     @Basic
-    @Column(name = "user_id", insertable = false, updatable = false)
+    @Column(name = "user_id", insertable = false, updatable = false, nullable = false)
     public long getUserId() {
         return userId;
     }
@@ -81,7 +81,7 @@ public class Product {
 
     @Basic
     @Min(0)
-    @Column(name = "stock_count")
+    @Column(name = "stock_count", nullable = false)
     public long getStockCount() {
         return stockCount;
     }
@@ -92,7 +92,7 @@ public class Product {
 
     @Basic
     @Min(0)
-    @Column(name = "awaiting_delivery_count")
+    @Column(name = "awaiting_delivery_count", nullable = false)
     public long getAwaitingDeliveryCount() {
         return awaitingDeliveryCount;
     }
@@ -103,7 +103,7 @@ public class Product {
 
     @Basic
     @Min(0)
-    @Column(name = "blocked_count")
+    @Column(name = "blocked_count", nullable = false)
     public long getBlockedCount() {
         return blockedCount;
     }
@@ -113,7 +113,7 @@ public class Product {
     }
 
     @Basic
-    @Column(name = "status", length = 16)
+    @Column(name = "status", length = 16, nullable = false)
     @Enumerated(EnumType.STRING)
     public Status getStatus() {
         return status;
@@ -124,7 +124,7 @@ public class Product {
     }
 
     @Basic
-    @Column(name = "price", precision = DB_PRECISION, scale = DB_SCALE)
+    @Column(name = "price", precision = DB_PRECISION, scale = DB_SCALE, nullable = false)
     public BigDecimal getPrice() {
         return price;
     }
@@ -134,7 +134,7 @@ public class Product {
     }
 
     @Basic
-    @Column(name = "barcode", length = 32)
+    @Column(name = "barcode", length = 32, nullable = false)
     public void setBarcode(String barcode) {
         this.barcode = barcode;
     }
@@ -155,7 +155,7 @@ public class Product {
     }
 
     @OneToOne(targetEntity = LongText.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "id", referencedColumnName = "recordId", foreignKey = @ForeignKey(name = "none"))
+    @JoinColumn(name = "record_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none"))
     @Where(clause = " owner_type = 'PRODUCT' and column = 'DESCRIPTION' ")
     public LongText getDescription() {
         return description;

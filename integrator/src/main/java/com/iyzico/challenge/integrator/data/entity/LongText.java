@@ -14,7 +14,7 @@ import javax.persistence.Table;
 public class LongText {
     private long id;
     private String table;
-    private String column;
+    private String columnName;
     private String recordId;
     private String content;
 
@@ -40,17 +40,17 @@ public class LongText {
     }
 
     @Basic
-    @Column(name = "column", length = 128)
-    public String getColumn() {
-        return column;
+    @Column(name = "column_name", length = 128)
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setColumn(String column) {
-        this.column = column;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     @Basic
-    @Column(name = "recordId", length = 64)
+    @Column(name = "record_id", length = 64)
     public String getRecordId() {
         return recordId;
     }

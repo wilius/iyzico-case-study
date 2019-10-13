@@ -1,6 +1,7 @@
 package com.iyzico.challenge.integrator.data.entity;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,9 +12,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
 import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
@@ -30,6 +33,7 @@ public class Payment {
 
     private User user;
     private Basket basket;
+    private Set<PaymentProduct> products;
 
     public enum Status {
         IN_PROGRESS, ERROR, SUCCESS
@@ -47,7 +51,7 @@ public class Payment {
     }
 
     @Basic
-    @Column(name = "user_id", insertable = false, updatable = false)
+    @Column(name = "user_id", insertable = false, updatable = false, nullable = false)
     public long getUserId() {
         return userId;
     }
@@ -57,7 +61,7 @@ public class Payment {
     }
 
     @Basic
-    @Column(name = "basket_id", insertable = false, updatable = false)
+    @Column(name = "basket_id", insertable = false, updatable = false, nullable = false)
     public long getBasketId() {
         return basketId;
     }
@@ -67,7 +71,7 @@ public class Payment {
     }
 
     @Basic
-    @Column(name = "status", length = 16, insertable = false, updatable = false)
+    @Column(name = "status", length = 16, insertable = false, updatable = false, nullable = false)
     @Enumerated(EnumType.STRING)
     public Status getStatus() {
         return status;
@@ -78,7 +82,7 @@ public class Payment {
     }
 
     @Basic
-    @Column(name = "amount", precision = DB_PRECISION, scale = DB_SCALE)
+    @Column(name = "amount", precision = DB_PRECISION, scale = DB_SCALE, nullable = false)
     public BigDecimal getAmount() {
         return amount;
     }
@@ -88,7 +92,7 @@ public class Payment {
     }
 
     @Basic
-    @Column(name = "create_time")
+    @Column(name = "create_time", nullable = false)
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -115,5 +119,14 @@ public class Payment {
 
     public void setBasket(Basket basket) {
         this.basket = basket;
+    }
+
+    @OneToMany(targetEntity = PaymentProduct.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "payment", orphanRemoval = true)
+    public Set<PaymentProduct> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<PaymentProduct> products) {
+        this.products = products;
     }
 }

@@ -1,9 +1,13 @@
 spring:
   datasource:
-    url: jdbc:hsqldb:hsql:/localhost:9001/integrator
-    driverClassName: org.hsqldb.jdbcDriver
-    username: root
-    password: pass
+#    url: jdbc:hsqldb:hsql:/localhost:9001/integrator
+#    driverClassName: org.hsqldb.jdbcDriver
+#    username: root
+#    password: pass
+    url: jdbc:sqlserver://localhost;databaseName=iyzico
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: mssql_password1234
     hikari:
       pool-name: integrator-db-pool
   jpa:
@@ -11,6 +15,7 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: update
+      dialect: org.hibernate.dialect.SQLServer2012Dialect
 iyzico:
   base-url: https://sandbox-api.iyzipay.com
   api-key: sandbox-wP19ADAs7HEf8fVEQpysbT78V8kC6ZGO

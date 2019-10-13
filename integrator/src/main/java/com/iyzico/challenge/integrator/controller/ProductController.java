@@ -6,6 +6,8 @@ import com.iyzico.challenge.integrator.dto.product.ProductDto;
 import com.iyzico.challenge.integrator.mapper.ProductMapper;
 import com.iyzico.challenge.integrator.session.SecuredEndpoint;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,6 +31,7 @@ public class ProductController {
             notes = "Gets an existing product"
     )
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Throwable.class, readOnly = true)
     public ProductDto get(@PathVariable("id") long id) {
         return mapper.mapWithDescription(service.getPublishedItem(id));
     }

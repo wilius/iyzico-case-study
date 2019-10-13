@@ -36,7 +36,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "name", length = 512)
+    @Column(name = "name", length = 512, nullable = false)
     public String getName() {
         return name;
     }
@@ -46,7 +46,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "surname", length = 512)
+    @Column(name = "surname", length = 512, nullable = false)
     public String getSurname() {
         return surname;
     }
@@ -56,7 +56,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "identity_no", length = 64)
+    @Column(name = "identity_no", length = 64, nullable = false)
     public String getIdentityNo() {
         return identityNo;
     }
@@ -66,7 +66,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "city", length = 64)
+    @Column(name = "city", length = 64, nullable = false)
     public String getCity() {
         return city;
     }
@@ -76,7 +76,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "country", length = 3)
+    @Column(name = "country", length = 3, nullable = false)
     public String getCountry() {
         return country;
     }
@@ -86,7 +86,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "email", length = 128)
+    @Column(name = "email", length = 128, nullable = false)
     public String getEmail() {
         return email;
     }
@@ -96,7 +96,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "phone_number", length = 16)
+    @Column(name = "phone_number", length = 16, nullable = false)
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -106,7 +106,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "address", length = 512)
+    @Column(name = "address", length = 512, nullable = false)
     public String getAddress() {
         return address;
     }
@@ -116,7 +116,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "zip_code", length = 16)
+    @Column(name = "zip_code", length = 16, nullable = false)
     public String getZipCode() {
         return zipCode;
     }
@@ -126,7 +126,7 @@ public class UserProfile {
     }
 
     @Basic
-    @Column(name = "registration_date")
+    @Column(name = "registration_date", nullable = false)
     public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }

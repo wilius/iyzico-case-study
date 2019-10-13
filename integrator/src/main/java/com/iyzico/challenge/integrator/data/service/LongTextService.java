@@ -18,7 +18,7 @@ public class LongTextService {
     public LongText create(String tableName, String columnName, String id, String content) {
         LongText longText = new LongText();
         longText.setTable(tableName);
-        longText.setColumn(columnName);
+        longText.setColumnName(columnName);
         longText.setRecordId(id);
         longText.setContent(content);
         return repository.save(longText);

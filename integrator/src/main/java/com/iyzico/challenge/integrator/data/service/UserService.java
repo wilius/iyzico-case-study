@@ -2,6 +2,7 @@ package com.iyzico.challenge.integrator.data.service;
 
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.entity.UserProfile;
+import com.iyzico.challenge.integrator.data.repository.UserProfileRepository;
 import com.iyzico.challenge.integrator.data.repository.UserRepository;
 import com.iyzico.challenge.integrator.dto.user.request.CreateUserRequest;
 import com.iyzico.challenge.integrator.exception.UserNotFoundException;
@@ -17,9 +18,12 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository repository;
+    private final UserProfileRepository profileRepository;
 
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository,
+                       UserProfileRepository profileRepository) {
         this.repository = repository;
+        this.profileRepository = profileRepository;
     }
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS, noRollbackFor = {
@@ -32,6 +36,18 @@ public class UserService {
         }
         return user.get();
     }
+
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS, noRollbackFor = {
+            UserNotFoundException.class
+    })
+    public UserProfile getProfileById(long profileId) {
+        Optional<UserProfile> profile = profileRepository.findById(profileId);
+        if (!profile.isPresent()) {
+            throw new RuntimeException(String.format("Profile with id %s not found", profile));
+        }
+        return profile.get();
+    }
+
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY, noRollbackFor = {
             UserNotFoundException.class
@@ -99,6 +115,11 @@ public class UserService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public void updateLastSessionKey(User user, String sessionKey) {
         user.setLastSessionKey(sessionKey);
+        repository.save(user);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public void updateUser(User user) {
         repository.save(user);
     }
 }

@@ -21,7 +21,8 @@ public class PaymentProduct {
     private long id;
     private long paymentId;
     private long productId;
-    private BigDecimal total;
+    private int count;
+    private BigDecimal price;
 
     private Payment payment;
     private Product product;
@@ -38,7 +39,7 @@ public class PaymentProduct {
     }
 
     @Basic
-    @Column(name = "payment_id", insertable = false, updatable = false)
+    @Column(name = "payment_id", insertable = false, updatable = false, nullable = false)
     public long getPaymentId() {
         return paymentId;
     }
@@ -48,7 +49,7 @@ public class PaymentProduct {
     }
 
     @Basic
-    @Column(name = "product_id", insertable = false, updatable = false)
+    @Column(name = "product_id", insertable = false, updatable = false, nullable = false)
     public long getProductId() {
         return productId;
     }
@@ -58,13 +59,23 @@ public class PaymentProduct {
     }
 
     @Basic
-    @Column(name = "total", precision = DB_PRECISION, scale = DB_SCALE)
-    public BigDecimal getTotal() {
-        return total;
+    @Column(name = "price", precision = DB_PRECISION, scale = DB_SCALE, nullable = false)
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setTotal(BigDecimal total) {
-        this.total = total;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    @Basic
+    @Column(name = "count", nullable = false)
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     @ManyToOne(targetEntity = Payment.class, fetch = FetchType.LAZY)

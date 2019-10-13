@@ -46,7 +46,7 @@ public class UserOrder {
     }
 
     @Basic
-    @Column(name = "user_id", insertable = false, updatable = false)
+    @Column(name = "user_id", insertable = false, updatable = false, nullable = false)
     public long getUserId() {
         return userId;
     }
@@ -56,7 +56,7 @@ public class UserOrder {
     }
 
     @Basic
-    @Column(name = "payment_id", insertable = false, updatable = false)
+    @Column(name = "payment_id", insertable = false, updatable = false, nullable = false)
     public long getPaymentId() {
         return paymentId;
     }
@@ -66,7 +66,7 @@ public class UserOrder {
     }
 
     @Basic
-    @Column(name = "basket_id", insertable = false, updatable = false)
+    @Column(name = "basket_id", insertable = false, updatable = false, nullable = false)
     public long getBasketId() {
         return basketId;
     }
@@ -76,7 +76,7 @@ public class UserOrder {
     }
 
     @Basic
-    @Column(name = "total", precision = DB_PRECISION, scale = DB_SCALE)
+    @Column(name = "total", precision = DB_PRECISION, scale = DB_SCALE, nullable = false)
     public BigDecimal getTotal() {
         return total;
     }
@@ -86,7 +86,7 @@ public class UserOrder {
     }
 
     @Basic
-    @Column(name = "create_time")
+    @Column(name = "create_time", nullable = false)
     public LocalDateTime getCreateTime() {
         return createTime;
     }

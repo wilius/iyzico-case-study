@@ -15,6 +15,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class BasketService {
@@ -86,6 +87,23 @@ public class BasketService {
         });
     }
 
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public Basket decreaseStocks(User user) {
+        List<Long> productIds = repository.getBasketProductIds(user.getId(), Basket.Status.ACTIVE);
+        // basket.setStatus(Basket.Status.STOCK_APPLIED);
+        return null;
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    public Basket rollbackStocks(User user) {
+        Basket basket = getByUser(user);
+        if (!Basket.Status.STOCK_APPLIED.equals(basket.getStatus())) {
+            return basket;
+        }
+
+        return basket;
+    }
+
     public Basket getByUser(User user) {
         return getUserBasket(user, true);
     }
@@ -119,5 +137,12 @@ public class BasketService {
                 return repository.save(created);
             });
         });
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    Basket complete(Basket basket) {
+        // basket.setStatus(Basket.Status.COMPLETED);
+        // return repository.save(basket);
+        return basket;
     }
 }

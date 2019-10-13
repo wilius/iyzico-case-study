@@ -104,6 +104,19 @@
             <artifactId>libphonenumber</artifactId>
             <version>8.10.13</version>
         </dependency>
+
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.6</version>
+        </dependency>
+
+        <!-- TODO remove it -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>7.4.1.jre8</version>
+        </dependency>
     </dependencies>
 
     <build>

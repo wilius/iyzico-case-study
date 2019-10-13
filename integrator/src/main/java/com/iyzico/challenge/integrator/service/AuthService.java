@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -31,5 +32,11 @@ public class AuthService {
         }
 
         throw new InvalidCredentialsException("Invalid credentials");
+    }
+
+    public void markAsLoggedIn(User user, String sessionKey) {
+        user.setLastLoginDate(LocalDateTime.now());
+        user.setLastSessionKey(sessionKey);
+        userService.updateUser(user);
     }
 }

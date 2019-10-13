@@ -38,7 +38,7 @@ public class BasketProduct {
     }
 
     @Basic
-    @Column(name = "basket_id", insertable = false, updatable = false)
+    @Column(name = "basket_id", insertable = false, updatable = false, nullable = false)
     public long getBasketId() {
         return basketId;
     }
@@ -48,7 +48,7 @@ public class BasketProduct {
     }
 
     @Basic
-    @Column(name = "product_id", insertable = false, updatable = false)
+    @Column(name = "product_id", insertable = false, updatable = false, nullable = false)
     public long getProductId() {
         return productId;
     }
@@ -58,7 +58,7 @@ public class BasketProduct {
     }
 
     @Basic
-    @Column(name = "count")
+    @Column(name = "count", nullable = false)
     public int getCount() {
         return count;
     }
@@ -68,7 +68,7 @@ public class BasketProduct {
     }
 
     @Basic
-    @Column(name = "create_time")
+    @Column(name = "create_time", nullable = false)
     public LocalDateTime getCreateTime() {
         return createTime;
     }
