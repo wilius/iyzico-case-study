@@ -48,21 +48,36 @@ public class IyzicoPaymentService {
         BankPaymentResponse response = null;
 
         Payment.Status status;
+        String message = null;
         try {
             response = bankService.pay(request);
             status = Payment.Status.SUCCESS;
         } catch (Throwable t) {
+            logger.warn("Unexpected exception during the payment", t);
+            message = t.getMessage();
             status = Payment.Status.ERROR;
         }
 
-        BankPaymentResponse finalResponse = response;
-        Payment.Status finalStatus = status;
         try {
-            requireNewTransactionTemplate.execute(x -> {
-                payment.setBankResponse(finalResponse == null ? "unknown" : finalResponse.getResultCode());
-                payment.setStatus(finalStatus);
-                return paymentRepository.saveAndFlush(payment);
-            });
+            String finalMessage = message;
+            BankPaymentResponse finalResponse = response;
+            Payment.Status finalStatus = status;
+
+            for (int i = 0; i < 10; i++) {
+                try {
+                    requireNewTransactionTemplate.execute(x -> {
+                        payment.setBankResponse(finalResponse == null ? finalMessage : finalResponse.getResultCode());
+                        payment.setStatus(finalStatus);
+                        return paymentRepository.saveAndFlush(payment);
+                    });
+
+                    break;
+                } catch (Throwable t) {
+                    if (i == 9) {
+                        throw t;
+                    }
+                }
+            }
         } catch (Throwable t) {
             // queue it to retry or send a notification to the operation department to review it and fix the problem manually
             logger.warn("Unexpected exception while saving state of payment. status: {}", status, t);
