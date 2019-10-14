@@ -2,7 +2,7 @@ package com.iyzico.challenge.integrator.controller;
 
 import com.iyzico.challenge.integrator.dto.payment.InstallmentDto;
 import com.iyzico.challenge.integrator.dto.payment.PaymentRequest;
-import com.iyzico.challenge.integrator.session.PaymentManager;
+import com.iyzico.challenge.integrator.service.PaymentManager;
 import com.iyzico.challenge.integrator.session.SecuredEndpoint;
 import com.iyzico.challenge.integrator.session.annotation.IntegratorSession;
 import com.iyzico.challenge.integrator.session.model.ApiSession;

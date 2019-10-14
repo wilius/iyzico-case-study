@@ -1,4 +1,4 @@
-package com.iyzico.challenge.integrator.session;
+package com.iyzico.challenge.integrator.service;
 
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.service.UserService;

@@ -1,6 +1,6 @@
 package com.iyzico.challenge.integrator.session.filter;
 
-import com.iyzico.challenge.integrator.session.SessionService;
+import com.iyzico.challenge.integrator.service.SessionService;
 import com.iyzico.challenge.integrator.session.wrapper.ApiSessionRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

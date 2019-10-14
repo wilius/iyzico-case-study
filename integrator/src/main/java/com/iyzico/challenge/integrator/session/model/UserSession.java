@@ -1,7 +1,7 @@
 package com.iyzico.challenge.integrator.session.model;
 
 import com.iyzico.challenge.integrator.data.entity.User;
-import com.iyzico.challenge.integrator.session.SessionService;
+import com.iyzico.challenge.integrator.service.SessionService;
 
 import java.time.LocalDateTime;
 

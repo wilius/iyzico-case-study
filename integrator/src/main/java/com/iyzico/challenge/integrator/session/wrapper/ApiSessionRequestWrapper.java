@@ -1,7 +1,7 @@
 package com.iyzico.challenge.integrator.session.wrapper;
 
 import com.iyzico.challenge.integrator.data.entity.User;
-import com.iyzico.challenge.integrator.session.SessionService;
+import com.iyzico.challenge.integrator.service.SessionService;
 import com.iyzico.challenge.integrator.session.model.ApiSession;
 import com.iyzico.challenge.integrator.session.model.UserSession;
 import org.apache.commons.lang3.StringUtils;
