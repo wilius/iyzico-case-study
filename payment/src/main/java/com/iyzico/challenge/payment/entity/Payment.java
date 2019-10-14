@@ -1,6 +1,8 @@
 package com.iyzico.challenge.payment.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.math.BigDecimal;
@@ -13,6 +15,13 @@ public class Payment {
     private Long id;
     private BigDecimal price;
     private String bankResponse;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    public enum Status {
+        IN_PROGRESS, ERROR, SUCCESS
+    }
 
     public Long getId() {
         return id;
@@ -36,5 +45,13 @@ public class Payment {
 
     public void setBankResponse(String bankResponse) {
         this.bankResponse = bankResponse;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
