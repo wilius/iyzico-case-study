@@ -10,25 +10,14 @@ import java.util.List;
 
 @Repository
 public interface BasketRepository extends CrudRepository<Basket, Long> {
-    Basket findFirstByUserIdAndStatus(long userId, Basket.Status status);
+    Basket findFirstByUserIdAndStatusIn(long userId, List<Basket.Status> statuses);
 
     @Query("" +
             " from Basket b " +
             "   left join fetch b.products s " +
             "   join fetch s.product " +
             " where b.userId = :userId " +
-            "   and b.status = :status ")
+            "   and b.status in :status ")
     Basket findFirstByUserIdAndStatusWithBasketContent(@Param("userId") long userId,
-                                                       @Param("status") Basket.Status status);
-
-    @Query("" +
-            " select " +
-            "   p.productId " +
-            " from Basket b " +
-            "   join b.products p" +
-            " where b.userId = :userId " +
-            "   and b.status = :status " +
-            " order by p.productId ")
-    List<Long> getBasketProductIds(@Param("userId") long userId,
-                                   @Param("status") Basket.Status status);
+                                                       @Param("status") List<Basket.Status> statuses);
 }

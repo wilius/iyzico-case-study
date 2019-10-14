@@ -114,7 +114,6 @@ public class SessionService {
         return session;
     }
 
-    // TODO make the null return value changes
     private UserSession createUserSession(String key, long userId, LocalDateTime createdAt, LocalDateTime lastLogin) {
         try {
             return new UserSession(this, key, userService.getById(userId), createdAt, lastLogin);

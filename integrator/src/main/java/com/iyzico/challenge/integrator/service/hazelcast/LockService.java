@@ -22,6 +22,14 @@ public class LockService {
         lockMap = hazelcast.getMap("integrator.lock.map");
     }
 
+    public <T> T executeInProductLock(long productId, Callable<T> callable) {
+        return executeInLock("product-" + productId, callable);
+    }
+
+    public BLock getProductLock(Long productId) {
+        return getLock("product-" + productId);
+    }
+
     public <T> T executeInBasketLock(User user, Callable<T> callable) {
         return executeInLock("basket-lock:" + user.getId(), callable);
     }

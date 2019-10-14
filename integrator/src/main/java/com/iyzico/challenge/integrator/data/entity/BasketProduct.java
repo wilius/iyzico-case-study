@@ -1,6 +1,7 @@
 package com.iyzico.challenge.integrator.data.entity;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -87,7 +88,7 @@ public class BasketProduct {
         this.basket = basket;
     }
 
-    @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     public Product getProduct() {
         return product;

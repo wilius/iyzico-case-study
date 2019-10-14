@@ -80,9 +80,9 @@ public class ManageProductController {
             notes = "Gets an existing product"
     )
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class, readOnly = true)
     public ProductDto get(@PathVariable("id") long id) {
-        return mapper.map(service.getById(id));
+        return mapper.mapWithDescription(service.getById(id));
     }
 
     @ApiOperation(
@@ -90,7 +90,7 @@ public class ManageProductController {
             notes = "Gets all of the existing products"
     )
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class, readOnly = true)
     public ListResponse<ProductDto> getAll() {
         return new ListResponse<>(
                 mapper.map(service.getAllItems())
@@ -102,7 +102,7 @@ public class ManageProductController {
             notes = "Gets all of the unpublished products"
     )
     @RequestMapping(value = "/all/unpublised", method = RequestMethod.GET)
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class, readOnly = true)
     public ListResponse<ProductDto> getUnpublishedProducts() {
         return new ListResponse<>(
                 mapper.map(service.getAllUnpublishedItems())

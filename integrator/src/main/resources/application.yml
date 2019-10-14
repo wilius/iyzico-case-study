@@ -11,11 +11,8 @@ spring:
     hikari:
       pool-name: integrator-db-pool
   jpa:
-    show-sql: true
-    open-in-view: false
     hibernate:
       ddl-auto: update
-      dialect: org.hibernate.dialect.SQLServer2012Dialect
 iyzico:
   base-url: https://sandbox-api.iyzipay.com
   api-key: sandbox-wP19ADAs7HEf8fVEQpysbT78V8kC6ZGO

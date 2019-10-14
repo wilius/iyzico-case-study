@@ -24,7 +24,7 @@ public class PaymentProduct {
     private int count;
     private BigDecimal price;
 
-    private Payment payment;
+    private UserPayment payment;
     private Product product;
 
     @Id
@@ -78,13 +78,13 @@ public class PaymentProduct {
         this.count = count;
     }
 
-    @ManyToOne(targetEntity = Payment.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = UserPayment.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", referencedColumnName = "id")
-    public Payment getPayment() {
+    public UserPayment getPayment() {
         return payment;
     }
 
-    public void setPayment(Payment payment) {
+    public void setPayment(UserPayment payment) {
         this.payment = payment;
     }
 

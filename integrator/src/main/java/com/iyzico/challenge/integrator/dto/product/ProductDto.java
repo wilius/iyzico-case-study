@@ -9,7 +9,6 @@ public class ProductDto {
     private String barcode;
     private String name;
     private long stockCount;
-    private long awaitingDeliveryCount;
     private Status status;
     private BigDecimal price;
 
@@ -50,14 +49,6 @@ public class ProductDto {
 
     public void setStockCount(long stockCount) {
         this.stockCount = stockCount;
-    }
-
-    public long getAwaitingDeliveryCount() {
-        return awaitingDeliveryCount;
-    }
-
-    public void setAwaitingDeliveryCount(long awaitingDeliveryCount) {
-        this.awaitingDeliveryCount = awaitingDeliveryCount;
     }
 
     public Status getStatus() {

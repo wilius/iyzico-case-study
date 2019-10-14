@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LongTextRepository extends JpaRepository<LongText, Long> {
+    LongText findFirstByTableAndAndColumnNameAndRecordId(String table, String column, String recordId);
 }

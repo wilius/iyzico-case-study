@@ -12,11 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
-import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
 
 @Entity
 @Table(name = "user_order", indexes = {
@@ -27,11 +23,10 @@ public class UserOrder {
     private long userId;
     private long paymentId;
     private long basketId;
-    private BigDecimal total;
     private LocalDateTime createTime;
 
     private User user;
-    private Payment payment;
+    private UserPayment payment;
     private Basket basket;
 
     @Id
@@ -76,16 +71,6 @@ public class UserOrder {
     }
 
     @Basic
-    @Column(name = "total", precision = DB_PRECISION, scale = DB_SCALE, nullable = false)
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
-    @Basic
     @Column(name = "create_time", nullable = false)
     public LocalDateTime getCreateTime() {
         return createTime;
@@ -105,13 +90,13 @@ public class UserOrder {
         this.user = user;
     }
 
-    @OneToOne(targetEntity = Payment.class, fetch = FetchType.LAZY)
+    @OneToOne(targetEntity = UserPayment.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", referencedColumnName = "id")
-    public Payment getPayment() {
+    public UserPayment getPayment() {
         return payment;
     }
 
-    public void setPayment(Payment payment) {
+    public void setPayment(UserPayment payment) {
         this.payment = payment;
     }
 

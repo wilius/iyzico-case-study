@@ -8,10 +8,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "long_text")
-public class LongText {
+public class LongText implements Serializable {
     private long id;
     private String table;
     private String columnName;

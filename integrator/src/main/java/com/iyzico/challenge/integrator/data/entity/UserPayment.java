@@ -1,5 +1,7 @@
 package com.iyzico.challenge.integrator.data.entity;
 
+import org.hibernate.annotations.Where;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -7,29 +9,39 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
 import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
 
 @Entity
-@Table(name = "payment")
-public class Payment {
+@Table(name = UserPayment.TABLE_NAME)
+public class UserPayment {
+    public static final String TABLE_NAME = "payment";
+    public static final String FAIL_REASON_COLUMN_NAME = "fail_reason";
+
     private long id;
     private long userId;
     private long basketId;
     private Status status;
     private BigDecimal amount;
     private LocalDateTime createTime;
+    private String paymentGatewayId;
+    private Map<String, LongText> longTexts = new HashMap<>();
 
     private User user;
     private Basket basket;
@@ -71,7 +83,7 @@ public class Payment {
     }
 
     @Basic
-    @Column(name = "status", length = 16, insertable = false, updatable = false, nullable = false)
+    @Column(name = "status", length = 16, nullable = false)
     @Enumerated(EnumType.STRING)
     public Status getStatus() {
         return status;
@@ -101,6 +113,16 @@ public class Payment {
         this.createTime = createTime;
     }
 
+    @Basic
+    @Column(name = "payment_gateway_id", length = 128)
+    public String getPaymentGatewayId() {
+        return paymentGatewayId;
+    }
+
+    public void setPaymentGatewayId(String paymentGatewayId) {
+        this.paymentGatewayId = paymentGatewayId;
+    }
+
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     public User getUser() {
@@ -128,5 +150,26 @@ public class Payment {
 
     public void setProducts(Set<PaymentProduct> products) {
         this.products = products;
+    }
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = LongText.class)
+    @MapKey(name = "columnName")
+    @JoinColumn(name = "record_id", foreignKey = @ForeignKey(name = "none"))
+    @Where(clause = "table_name = '" + TABLE_NAME + "'")
+    public Map<String, LongText> getLongTexts() {
+        return longTexts;
+    }
+
+    public void setLongTexts(Map<String, LongText> longTexts) {
+        this.longTexts = longTexts;
+    }
+
+    @Transient
+    public LongText getFailReason() {
+        return longTexts.get(FAIL_REASON_COLUMN_NAME);
+    }
+
+    public void setFailReason(LongText failReason) {
+        longTexts.put(FAIL_REASON_COLUMN_NAME, failReason);
     }
 }

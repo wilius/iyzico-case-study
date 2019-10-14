@@ -24,4 +24,13 @@ public class LongTextService {
         return repository.save(longText);
     }
 
+    public LongText update(String tableName, String column, String recordId, String content) {
+        LongText longText = repository.findFirstByTableAndAndColumnNameAndRecordId(tableName, column, recordId);
+        if (longText == null) {
+            return create(tableName, column, recordId, content);
+        }
+
+        longText.setContent(content);
+        return repository.save(longText);
+    }
 }

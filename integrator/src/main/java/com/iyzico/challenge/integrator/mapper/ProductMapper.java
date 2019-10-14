@@ -35,7 +35,6 @@ public class ProductMapper {
         dto.setBarcode(product.getBarcode());
         dto.setName(product.getName());
         dto.setStockCount(product.getStockCount());
-        dto.setAwaitingDeliveryCount(product.getAwaitingDeliveryCount());
         dto.setPrice(product.getPrice());
         dto.setStatus(ProductDto.Status.valueOf(product.getStatus().name()));
 

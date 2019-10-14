@@ -13,19 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 
 @Service
 public class ProductService {
     private final ProductRepository repository;
-    private final LongTextService longTextService;
     private final LockService lockService;
 
     public ProductService(ProductRepository repository,
-                          LongTextService longTextService,
                           LockService lockService) {
         this.repository = repository;
-        this.longTextService = longTextService;
         this.lockService = lockService;
     }
 
@@ -75,15 +71,14 @@ public class ProductService {
         product.setStockCount(stockCount);
         product.setUser(user);
         product.setPrice(price);
-        product.setAwaitingDeliveryCount(0);
 
         product = repository.saveAndFlush(product);
         if (StringUtils.isNotEmpty(description)) {
-            LongText desc = longTextService.create(
-                    Product.TABLE_NAME,
-                    Product.DESCRIPTION_COLUMN_NAME,
-                    String.valueOf(product.getId()),
-                    description);
+            LongText desc = new LongText();
+            desc.setTable(Product.TABLE_NAME);
+            desc.setColumnName(Product.DESCRIPTION_COLUMN_NAME);
+            desc.setRecordId(String.valueOf(product.getId()));
+            desc.setContent(description);
 
             product.setDescription(desc);
         }
@@ -93,24 +88,34 @@ public class ProductService {
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
     public Product update(long id, String barcode, String name, long stockCount, BigDecimal price, String description) {
-        return execute(id, () -> {
+        return lockService.executeInProductLock(id, () -> {
             Product product = getById(id);
-            if (stockCount < product.getAwaitingDeliveryCount()) {
-                // TODO convert it to a known error
-                throw new RuntimeException();
-            }
-
             product.setName(name);
             product.setBarcode(barcode);
             product.setStockCount(stockCount);
             product.setPrice(price);
+            if (StringUtils.isNotEmpty(description)) {
+
+                LongText desc = product.getDescription();
+                if (desc == null) {
+                    desc = new LongText();
+                    desc.setTable(Product.TABLE_NAME);
+                    desc.setColumnName(Product.DESCRIPTION_COLUMN_NAME);
+                    desc.setRecordId(String.valueOf(product.getId()));
+                }
+
+                desc.setContent(description);
+
+                product.setDescription(desc);
+            }
+
             return repository.save(product);
         });
     }
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public Product publish(long id) {
-        return execute(id, () -> {
+    public void publish(long id) {
+        lockService.executeInProductLock(id, () -> {
             Product product = getById(id);
             updatePublishedProductStatus(product);
             return repository.save(product);
@@ -118,20 +123,16 @@ public class ProductService {
     }
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public Product unpublish(long id) {
-        return execute(id, () -> {
+    public void unpublish(long id) {
+        lockService.executeInProductLock(id, () -> {
             Product product = getById(id);
             product.setStatus(Product.Status.UNPUBLISHED);
             return repository.save(product);
         });
     }
 
-    private <T> T execute(long productId, Callable<T> callable) {
-        return lockService.executeInLock("product-" + productId, callable);
-    }
-
     private void updatePublishedProductStatus(Product product) {
-        if (product.hasItemToSell()) {
+        if (product.getStockCount() > 0) {
             product.setStatus(Product.Status.IN_STOCK);
         } else {
             product.setStatus(Product.Status.OUT_OF_STOCK);

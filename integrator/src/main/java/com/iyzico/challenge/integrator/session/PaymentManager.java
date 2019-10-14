@@ -3,10 +3,12 @@ package com.iyzico.challenge.integrator.session;
 import com.iyzico.challenge.integrator.data.entity.Basket;
 import com.iyzico.challenge.integrator.data.entity.BasketProduct;
 import com.iyzico.challenge.integrator.data.entity.User;
+import com.iyzico.challenge.integrator.data.entity.UserPayment;
 import com.iyzico.challenge.integrator.data.entity.UserProfile;
 import com.iyzico.challenge.integrator.data.service.BasketService;
 import com.iyzico.challenge.integrator.data.service.PaymentService;
 import com.iyzico.challenge.integrator.data.service.UserService;
+import com.iyzico.challenge.integrator.exception.InvalidInstallmentCountException;
 import com.iyzico.challenge.integrator.exception.PaymentException;
 import com.iyzico.challenge.integrator.properties.IyzicoProperties;
 import com.iyzico.challenge.integrator.service.hazelcast.LockService;
@@ -29,9 +31,6 @@ import com.iyzipay.request.RetrieveInstallmentInfoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -51,11 +50,9 @@ public class PaymentManager {
     private final UserService userService;
     private final LockService lockService;
     private final Options options;
-    private final TransactionTemplate requireNewTransactionTemplate;
 
     public PaymentManager(PaymentService paymentService,
                           LockService lockService,
-                          PlatformTransactionManager transactionManager,
                           BasketService basketService,
                           IyzicoProperties properties,
                           UserService userService) {
@@ -64,8 +61,6 @@ public class PaymentManager {
         this.lockService = lockService;
         this.basketService = basketService;
         this.userService = userService;
-        requireNewTransactionTemplate = new TransactionTemplate(transactionManager);
-        requireNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
         Options options = new Options();
         options.setBaseUrl(properties.getBaseUrl());
@@ -104,40 +99,62 @@ public class PaymentManager {
     }
 
     private Payment doPay(User user, String holderName, String cardNumber, YearMonth expire, String cvc, String ip, int installmentCount) {
-        Basket basket;
+        log.info("Payment started for user {}. ip: {}, installmentCount: {}", user.getId(), ip, installmentCount);
+
+        Basket basket = null;
+
         UserProfile profile;
         InstallmentPrice installment;
-
+        UserPayment payment;
         try {
-            basket = requireNewTransactionTemplate.execute(x -> basketService.decreaseStocks(user));
+            log.info("Getting profile with id {}", user.getUserProfileId());
             // due to lazy loading exception
             profile = userService.getProfileById(user.getUserProfileId());
 
+            basket = basketService.getByUser(user);
+
             installment = validateAndGetInstallment(user, basket, cardNumber, installmentCount);
+
+            log.info("Starting to decrease stocks for user {}", user.getId());
+            basket = basketService.decreaseStocks(user, basket);
+
+            payment = paymentService.startPayment(user, basket);
         } catch (Throwable t) {
-            requireNewTransactionTemplate.execute(x -> basketService.rollbackStocks(user));
+            log.warn("Unexpected exception during the initialization of the payment", t);
+            if (basket != null) {
+                try {
+                    basketService.rollbackStocks(user, basket);
+                } catch (Throwable t2) {
+                    // send a notification to manually solve the problem
+                    log.warn("Unexpected exception during the rollback of user basket", t2);
+                    throw t2;
+                }
+            }
+
             throw t;
         }
 
-        com.iyzico.challenge.integrator.data.entity.Payment payment = null;
         Payment response;
         try {
-            payment = paymentService.startPayment(user, basket);
-
             response = sendPaymentRequest(user, basket, profile, installment, holderName, cardNumber, expire, cvc, ip);
-            paymentService.markAsSuccess(payment, basket);
         } catch (Throwable t) {
-            com.iyzico.challenge.integrator.data.entity.Payment finalPayment = payment;
-
-            requireNewTransactionTemplate.execute(x -> {
-                if (finalPayment != null) {
-                    paymentService.markAsFailure(finalPayment);
-                }
-
-                return null;
-            });
+            log.warn("Unexpected exception during the payment request", t);
+            try {
+                paymentService.markAsFailure(payment, t.getMessage());
+            } catch (Throwable t2) {
+                // send a notification to manually solve the problem
+                log.warn("Unexpected exception while marking payment as failure", t2);
+                throw t2;
+            }
 
             throw t;
+        }
+
+        try {
+            paymentService.markAsSuccess(user, payment, basket, response);
+        } catch (Throwable t) {
+            // send a notification to manually solve the problem
+            log.warn("Unexpected exception occurred during the payment", t);
         }
 
         return response;
@@ -216,8 +233,7 @@ public class PaymentManager {
                 .findFirst();
 
         if (!installmentResult.isPresent()) {
-            // TODO
-            throw new RuntimeException("Invalid installment");
+            throw new InvalidInstallmentCountException("Invalid installment");
         }
 
         return installmentResult.get();

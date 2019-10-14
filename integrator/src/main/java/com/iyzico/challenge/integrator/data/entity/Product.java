@@ -3,6 +3,7 @@ package com.iyzico.challenge.integrator.data.entity;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,11 +16,14 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.iyzico.challenge.integrator.util.Constant.DB_PRECISION;
 import static com.iyzico.challenge.integrator.util.Constant.DB_SCALE;
@@ -35,12 +39,10 @@ public class Product {
     private String name;
     private long userId;
     private long stockCount;
-    private long awaitingDeliveryCount = 0;
-    private long blockedCount = 0;
     private Status status;
     private BigDecimal price;
     private String barcode;
-    private LongText description;
+    private Map<String, LongText> longTexts = new HashMap<>();
 
     private User user;
 
@@ -91,28 +93,6 @@ public class Product {
     }
 
     @Basic
-    @Min(0)
-    @Column(name = "awaiting_delivery_count", nullable = false)
-    public long getAwaitingDeliveryCount() {
-        return awaitingDeliveryCount;
-    }
-
-    public void setAwaitingDeliveryCount(long awaitingDeliveryCount) {
-        this.awaitingDeliveryCount = awaitingDeliveryCount;
-    }
-
-    @Basic
-    @Min(0)
-    @Column(name = "blocked_count", nullable = false)
-    public long getBlockedCount() {
-        return blockedCount;
-    }
-
-    public void setBlockedCount(long blockedCount) {
-        this.blockedCount = blockedCount;
-    }
-
-    @Basic
     @Column(name = "status", length = 16, nullable = false)
     @Enumerated(EnumType.STRING)
     public Status getStatus() {
@@ -154,20 +134,25 @@ public class Product {
         this.user = user;
     }
 
-    @OneToOne(targetEntity = LongText.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "record_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "none"))
-    @Where(clause = " owner_type = 'PRODUCT' and column = 'DESCRIPTION' ")
-    public LongText getDescription() {
-        return description;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = LongText.class)
+    @MapKey(name = "columnName")
+    @JoinColumn(name = "record_id", foreignKey = @ForeignKey(name = "none"))
+    @Where(clause = "table_name = '" + TABLE_NAME + "'")
+    public Map<String, LongText> getLongTexts() {
+        return longTexts;
     }
 
-    public void setDescription(LongText description) {
-        this.description = description;
+    public void setLongTexts(Map<String, LongText> longTexts) {
+        this.longTexts = longTexts;
     }
 
     @Transient
-    public boolean hasItemToSell() {
-        return stockCount - awaitingDeliveryCount > 0;
+    public LongText getDescription() {
+        return longTexts.get(DESCRIPTION_COLUMN_NAME);
+    }
+
+    public void setDescription(LongText description) {
+        longTexts.put(DESCRIPTION_COLUMN_NAME, description);
     }
 
 }
