@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface IntegratorSession {
-    String DEFAULT_VALUE = SecurityInterceptor.HOLIDEA_SESSION;
+    String DEFAULT_VALUE = SecurityInterceptor.SESSION;
 
     String value() default DEFAULT_VALUE;
 }

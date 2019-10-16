@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class SecurityInterceptor extends HandlerInterceptorAdapter {
-    public final static String HOLIDEA_SESSION = "HOLIDEA_SESSION";
+    public final static String SESSION = "INTEGRATION_SESSION";
     private final static Logger log = LoggerFactory.getLogger(SecurityInterceptor.class);
 
     @Override
@@ -35,13 +35,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
                 }
             }
 
-            if (security.requireSuperUserPermission()) {
-                if (!session.getUser().isAdmin()) {
-                    throw new AuthorizationException("Not authorized");
-                }
-            }
-
-            request.setAttribute(SecurityInterceptor.HOLIDEA_SESSION, session.getUserSession());
+            request.setAttribute(SecurityInterceptor.SESSION, session);
         }
 
         return true;
@@ -78,6 +72,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
                     throw new NullPointerException();
                 }
             }
+
             this.secured = secured;
 
         }
@@ -88,10 +83,6 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
 
         private boolean requireAdminPermission() {
             return secured.requireAdminPermission();
-        }
-
-        public boolean requireSuperUserPermission() {
-            return secured.requireSuperUserPermission();
         }
     }
 }

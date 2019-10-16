@@ -7,7 +7,7 @@ import com.iyzico.challenge.integrator.dto.user.UserDto;
 import com.iyzico.challenge.integrator.dto.user.request.CreateUserRequest;
 import com.iyzico.challenge.integrator.dto.user.request.UpdateUserRequest;
 import com.iyzico.challenge.integrator.mapper.UserMapper;
-import com.iyzico.challenge.integrator.session.AdminEndpoint;
+import com.iyzico.challenge.integrator.session.SecuredEndpoint;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,7 +23,7 @@ import javax.validation.Valid;
 import java.util.LinkedList;
 
 @RestController
-@AdminEndpoint
+@SecuredEndpoint(requireAdminPermission = true)
 @RequestMapping("management/user")
 public class UserController {
     private final UserService userService;

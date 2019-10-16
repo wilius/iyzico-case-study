@@ -1,6 +1,7 @@
 package com.iyzico.challenge.integrator.session.annotation;
 
-import com.iyzico.challenge.integrator.session.model.UserSession;
+import com.iyzico.challenge.integrator.session.SecurityInterceptor;
+import com.iyzico.challenge.integrator.session.model.ApiSession;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -12,7 +13,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         IntegratorSession session = parameter.getParameterAnnotation(IntegratorSession.class);
-        return session != null && UserSession.class.isAssignableFrom(parameter.getParameterType());
+        return session != null && ApiSession.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override
@@ -20,9 +21,9 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         IntegratorSession session = parameter.getParameterAnnotation(IntegratorSession.class);
 
         if (session == null) {
-            throw new IllegalStateException("Missing BirdUser annotation.");
+            throw new IllegalStateException("Missing annotation.");
         }
 
-        return webRequest.getAttribute(session.value(), RequestAttributes.SCOPE_REQUEST);
+        return webRequest.getAttribute(SecurityInterceptor.SESSION, RequestAttributes.SCOPE_REQUEST);
     }
 }

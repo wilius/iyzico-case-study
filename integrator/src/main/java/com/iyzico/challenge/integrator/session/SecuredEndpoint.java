@@ -13,6 +13,4 @@ public @interface SecuredEndpoint {
     boolean isAllowAnonymous() default false;
 
     boolean requireAdminPermission() default false;
-
-    boolean requireSuperUserPermission() default false;
 }

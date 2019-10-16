@@ -6,7 +6,7 @@ import com.iyzico.challenge.integrator.dto.product.ProductDto;
 import com.iyzico.challenge.integrator.dto.product.request.CreateProductRequest;
 import com.iyzico.challenge.integrator.dto.product.request.UpdateProductRequest;
 import com.iyzico.challenge.integrator.mapper.ProductMapper;
-import com.iyzico.challenge.integrator.session.AdminEndpoint;
+import com.iyzico.challenge.integrator.session.SecuredEndpoint;
 import com.iyzico.challenge.integrator.session.annotation.IntegratorSession;
 import com.iyzico.challenge.integrator.session.model.ApiSession;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-@AdminEndpoint
+@SecuredEndpoint(requireAdminPermission = true)
 @RequestMapping("management/product")
 public class ManageProductController {
 

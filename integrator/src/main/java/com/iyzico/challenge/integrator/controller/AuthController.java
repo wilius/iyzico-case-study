@@ -5,6 +5,7 @@ import com.iyzico.challenge.integrator.dto.auth.LoginRequest;
 import com.iyzico.challenge.integrator.dto.user.UserDto;
 import com.iyzico.challenge.integrator.mapper.UserMapper;
 import com.iyzico.challenge.integrator.service.AuthService;
+import com.iyzico.challenge.integrator.session.SecuredEndpoint;
 import com.iyzico.challenge.integrator.session.annotation.IntegratorSession;
 import com.iyzico.challenge.integrator.session.model.ApiSession;
 import com.iyzico.challenge.integrator.session.wrapper.ApiSessionRequestWrapper;
@@ -42,8 +43,8 @@ public class AuthController {
         return userMapper.map(user);
     }
 
+    @SecuredEndpoint
     @RequestMapping(path = "/logout", method = RequestMethod.GET)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logout(@ApiIgnore @IntegratorSession ApiSession session) {
         session.invalidate();
     }

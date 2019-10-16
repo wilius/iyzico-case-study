@@ -1,13 +1,9 @@
 spring:
   datasource:
-#    url: jdbc:hsqldb:hsql:/localhost:9001/integrator
-#    driverClassName: org.hsqldb.jdbcDriver
-#    username: root
-#    password: pass
-    url: jdbc:sqlserver://localhost;databaseName=iyzico
-    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    username: sa
-    password: mssql_password1234
+    url: jdbc:hsqldb:hsql:/localhost:9001/integrator
+    driverClassName: org.hsqldb.jdbcDriver
+    username: root
+    password: pass
     hikari:
       pool-name: integrator-db-pool
   jpa:

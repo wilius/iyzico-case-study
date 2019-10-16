@@ -14,7 +14,8 @@ public class HttpUtils {
             "HTTP_FORWARDED_FOR",
             "HTTP_FORWARDED",
             "HTTP_VIA",
-            "REMOTE_ADDR"};
+            "REMOTE_ADDR"
+    };
 
     public static String getClientIp(HttpServletRequest request) {
 

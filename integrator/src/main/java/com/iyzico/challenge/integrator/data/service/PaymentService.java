@@ -18,16 +18,13 @@ public class PaymentService {
 
     private final PaymentRepository repository;
     private final BasketService basketService;
-    private final LongTextService longTextService;
     private final UserOrderService userOrderService;
 
     public PaymentService(PaymentRepository repository,
                           BasketService basketService,
-                          LongTextService longTextService,
                           UserOrderService userOrderService) {
         this.repository = repository;
         this.basketService = basketService;
-        this.longTextService = longTextService;
         this.userOrderService = userOrderService;
     }
 
@@ -67,13 +64,12 @@ public class PaymentService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public void markAsFailure(UserPayment payment, String message) {
         payment.setStatus(UserPayment.Status.ERROR);
-        LongText failReason = longTextService.create(
-                UserPayment.TABLE_NAME,
-                UserPayment.FAIL_REASON_COLUMN_NAME,
-                String.valueOf(payment.getId()),
-                message);
-
-        // payment.setFailReason(failReason);
+        LongText failReason = new LongText();
+        failReason.setTable(UserPayment.TABLE_NAME);
+        failReason.setColumnName(UserPayment.FAIL_REASON_COLUMN_NAME);
+        failReason.setRecordId(String.valueOf(payment.getId()));
+        failReason.setContent(message);
+        payment.setFailReason(failReason);
         repository.save(payment);
     }
 }
