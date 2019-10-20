@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.LinkedList;
 
 @RestController
 @SecuredEndpoint(requireAdminPermission = true)
@@ -42,7 +41,7 @@ public class UserController {
     )
     @RequestMapping(path = "/{id}", method = RequestMethod.GET)
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-    public UserDto get(@PathVariable("id") int id) {
+    public UserDto get(@PathVariable("id") long id) {
         User user = userService.getById(id);
         return userMapper.map(user);
     }
@@ -53,14 +52,8 @@ public class UserController {
     )
     @RequestMapping(method = RequestMethod.GET)
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-    public ListResponse<UserDto> get() {
-        ListResponse<UserDto> response = new ListResponse<>();
-        LinkedList<UserDto> users = new LinkedList<>();
-        for (User user : userService.getAllUsers()) {
-            users.add(userMapper.map(user));
-        }
-        response.setItems(users);
-        return response;
+    public ListResponse<UserDto> getAll() {
+        return new ListResponse<>(userMapper.map(userService.getAll()));
     }
 
     @ApiOperation(
@@ -91,7 +84,7 @@ public class UserController {
     )
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
-    public void inactivate(@PathVariable("id") int id) {
+    public void inactivate(@PathVariable("id") long id) {
         userService.inactivate(id);
     }
 }

@@ -92,7 +92,7 @@ public class SessionService {
         LocalDateTime createdAt = LocalDateTime.now();
         UserSession session = createUserSession(sessionKey, userId, createdAt, createdAt);
         String lastSessionKey = user.getLastSessionKey();
-        userService.updateLastSessionKey(user, sessionKey);
+        userService.markAsLoggedIn(user, sessionKey);
 
         byte[] keyAsBytes = redisSessionKey.getBytes(StandardCharsets.UTF_8);
         byte[] createdAtBytes = createdAt.toString().getBytes(StandardCharsets.UTF_8);

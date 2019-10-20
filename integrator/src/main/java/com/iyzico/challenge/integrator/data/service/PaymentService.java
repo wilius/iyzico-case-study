@@ -49,7 +49,8 @@ public class PaymentService {
                         })
                         .collect(Collectors.toSet()));
 
-        return repository.save(payment);
+        repository.save(payment);
+        return payment;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)

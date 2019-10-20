@@ -41,6 +41,11 @@ public class UserPayment {
     private BigDecimal amount;
     private LocalDateTime createTime;
     private String paymentGatewayId;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = LongText.class)
+    @MapKey(name = "columnName")
+    @JoinColumn(name = "record_id", foreignKey = @ForeignKey(name = "none"))
+    @Where(clause = "table_name = '" + TABLE_NAME + "'")
     private Map<String, LongText> longTexts = new HashMap<>();
 
     private User user;
@@ -150,18 +155,6 @@ public class UserPayment {
 
     public void setProducts(Set<PaymentProduct> products) {
         this.products = products;
-    }
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = LongText.class)
-    @MapKey(name = "columnName")
-    @JoinColumn(name = "record_id", foreignKey = @ForeignKey(name = "none"))
-    @Where(clause = "table_name = '" + TABLE_NAME + "'")
-    public Map<String, LongText> getLongTexts() {
-        return longTexts;
-    }
-
-    public void setLongTexts(Map<String, LongText> longTexts) {
-        this.longTexts = longTexts;
     }
 
     @Transient

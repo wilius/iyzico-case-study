@@ -68,9 +68,9 @@ public class PaymentController {
         dto.setCardAssociation(details.getCardAssociation());
         dto.setBankCode(details.getBankCode());
         dto.setBankName(details.getBankName());
-        dto.setForce3ds(details.getForce3ds() > 0);
-        dto.setCommercial(details.getCommercial() > 0);
-        dto.setForceCvc(details.getForceCvc() > 0);
+        dto.setForce3ds(int2bool(details.getForce3ds()));
+        dto.setCommercial(int2bool(details.getCommercial()));
+        dto.setForceCvc(int2bool(details.getForceCvc()));
         dto.setPrices(details.getInstallmentPrices()
                 .stream()
                 .map(x -> {
@@ -82,5 +82,9 @@ public class PaymentController {
                 })
                 .collect(Collectors.toList()));
         return dto;
+    }
+
+    private boolean int2bool(Integer integer) {
+        return integer != null && integer != 0;
     }
 }

@@ -6,6 +6,7 @@ import com.iyzico.challenge.integrator.data.repository.UserProfileRepository;
 import com.iyzico.challenge.integrator.data.repository.UserRepository;
 import com.iyzico.challenge.integrator.dto.user.request.CreateUserRequest;
 import com.iyzico.challenge.integrator.exception.UserNotFoundException;
+import com.iyzico.challenge.integrator.exception.UserProfileNotFoundException;
 import com.iyzico.challenge.integrator.exception.UsernameTakenByAnotherUserException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class UserService {
     public UserProfile getProfileById(long profileId) {
         Optional<UserProfile> profile = profileRepository.findById(profileId);
         if (!profile.isPresent()) {
-            throw new RuntimeException(String.format("Profile with id %s not found", profile));
+            throw new UserProfileNotFoundException(String.format("Profile with id %s not found", profileId));
         }
         return profile.get();
     }
@@ -60,7 +61,7 @@ public class UserService {
         return user;
     }
 
-    public Iterable<User> getAllUsers() {
+    public Iterable<User> getAll() {
         return repository.findAll();
     }
 
@@ -112,14 +113,10 @@ public class UserService {
         repository.save(user);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
-    public void updateLastSessionKey(User user, String sessionKey) {
-        user.setLastSessionKey(sessionKey);
-        repository.save(user);
-    }
-
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public void updateUser(User user) {
+    public void markAsLoggedIn(User user, String sessionKey) {
+        user.setLastLoginDate(LocalDateTime.now());
+        user.setLastSessionKey(sessionKey);
         repository.save(user);
     }
 }

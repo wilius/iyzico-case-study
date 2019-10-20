@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "basket_product")
-public class BasketProduct {
+public class BasketProduct implements Comparable<BasketProduct> {
     private long id;
     private long basketId;
     private long productId;
@@ -101,5 +101,10 @@ public class BasketProduct {
     @Transient
     public BigDecimal getSubtotal() {
         return getProduct().getPrice().multiply(new BigDecimal(count));
+    }
+
+    @Override
+    public int compareTo(BasketProduct o) {
+        return Long.compare(productId, o.getBasketId());
     }
 }

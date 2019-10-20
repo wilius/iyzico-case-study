@@ -70,7 +70,7 @@ public class PaymentManager {
     }
 
     public InstallmentDetail getInstallments(User user, String digits) {
-        Basket basket = basketService.getByUser(user);
+        Basket basket = basketService.getUserBasket(user);
         return getInstallments(user, basket, digits);
     }
 
@@ -111,7 +111,7 @@ public class PaymentManager {
             // due to lazy loading exception
             profile = userService.getProfileById(user.getUserProfileId());
 
-            basket = basketService.getByUser(user);
+            basket = basketService.getUserBasket(user);
 
             installment = validateAndGetInstallment(user, basket, cardNumber, installmentCount);
 

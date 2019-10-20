@@ -48,7 +48,7 @@ public class ProductService {
     }
 
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = Throwable.class, readOnly = true)
-    public Product getPublishedItem(long id) {
+    public Product getPublishedItem(long id) throws ProductNotFoundException {
         Product product = getById(id);
         if (Product.Status.UNPUBLISHED.equals(product.getStatus())) {
             throw new ProductNotFoundException(String.format("Product with id %s not found", id));
@@ -94,6 +94,7 @@ public class ProductService {
             product.setBarcode(barcode);
             product.setStockCount(stockCount);
             product.setPrice(price);
+            updatePublishedProductStatus(product);
             if (StringUtils.isNotEmpty(description)) {
 
                 LongText desc = product.getDescription();
@@ -109,7 +110,8 @@ public class ProductService {
                 product.setDescription(desc);
             }
 
-            return repository.save(product);
+            repository.save(product);
+            return product;
         });
     }
 
@@ -132,10 +134,13 @@ public class ProductService {
     }
 
     private void updatePublishedProductStatus(Product product) {
-        if (product.getStockCount() > 0) {
-            product.setStatus(Product.Status.IN_STOCK);
-        } else {
-            product.setStatus(Product.Status.OUT_OF_STOCK);
+        if (Product.Status.IN_STOCK.equals(product.getStatus()) ||
+                Product.Status.OUT_OF_STOCK.equals(product.getStatus())) {
+            if (product.getStockCount() > 0) {
+                product.setStatus(Product.Status.IN_STOCK);
+            } else {
+                product.setStatus(Product.Status.OUT_OF_STOCK);
+            }
         }
     }
 }

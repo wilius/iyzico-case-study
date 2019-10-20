@@ -63,7 +63,7 @@ public class BasketController {
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Throwable.class, readOnly = true)
     public BasketDto get(@ApiIgnore @IntegratorSession ApiSession session) {
         return mapper.map(
-                service.getByUser(session.getUser())
+                service.getUserBasket(session.getUser())
         );
     }
 

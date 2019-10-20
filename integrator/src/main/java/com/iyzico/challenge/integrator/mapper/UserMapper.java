@@ -6,10 +6,21 @@ import com.iyzico.challenge.integrator.dto.user.UserDto;
 import com.iyzico.challenge.integrator.dto.user.UserProfileDto;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Component
 public class UserMapper {
 
     public UserMapper() {
+    }
+
+    public List<UserDto> map(Iterable<User> users) {
+        LinkedList<UserDto> dtos = new LinkedList<>();
+        for (User user : users) {
+            dtos.add(map(user));
+        }
+        return dtos;
     }
 
     public UserDto map(User user) {
@@ -27,7 +38,7 @@ public class UserMapper {
         return dto;
     }
 
-    public UserProfileDto map(UserProfile profile) {
+    private UserProfileDto map(UserProfile profile) {
         UserProfileDto dto = new UserProfileDto();
         dto.setName(profile.getName());
         dto.setSurname(profile.getSurname());

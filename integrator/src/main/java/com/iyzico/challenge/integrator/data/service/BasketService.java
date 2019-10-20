@@ -5,11 +5,13 @@ import com.iyzico.challenge.integrator.data.entity.BasketProduct;
 import com.iyzico.challenge.integrator.data.entity.Product;
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.repository.BasketRepository;
+import com.iyzico.challenge.integrator.exception.BaseIntegratorException;
 import com.iyzico.challenge.integrator.exception.EmptyBasketException;
 import com.iyzico.challenge.integrator.exception.InvalidBasketStatusException;
 import com.iyzico.challenge.integrator.exception.StockNotEnoughException;
 import com.iyzico.challenge.integrator.service.hazelcast.BLock;
 import com.iyzico.challenge.integrator.service.hazelcast.LockService;
+import com.iyzico.challenge.integrator.service.hazelcast.exception.CannotHoldTheLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -58,7 +60,7 @@ public class BasketService {
                 throw new StockNotEnoughException("Stock count is not enough");
             }
 
-            Basket basket = getUserBasket(user, true);
+            Basket basket = getUserBasket(user);
             for (BasketProduct basketProduct : basket.getProducts()) {
                 if (basketProduct.getProductId() == productId) {
                     basketProduct.setCount(basketProduct.getCount() + count);
@@ -94,12 +96,44 @@ public class BasketService {
         });
     }
 
+    @Transactional(propagation = Propagation.NEVER)
     public Basket decreaseStocks(User user, Basket basket) {
         return updateStock(user, basket, Basket.Status.STOCK_APPLIED);
     }
 
-    public void rollbackStocks(User user, Basket basket) {
-        updateStock(user, basket, Basket.Status.ACTIVE);
+    @Transactional(propagation = Propagation.NEVER)
+    public Basket rollbackStocks(User user, Basket basket) {
+        return updateStock(user, basket, Basket.Status.ACTIVE);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    void complete(Basket basket) {
+        basket.setStatus(Basket.Status.COMPLETED);
+        repository.save(basket);
+    }
+
+    public Basket getUserBasket(User user) {
+        List<Basket.Status> statuses = Arrays.asList(Basket.Status.ACTIVE, Basket.Status.STOCK_APPLIED);
+        Basket basket = repository.findFirstByUserIdAndStatusWithBasketContent(user.getId(), statuses);
+
+        if (basket != null) {
+            return basket;
+        }
+
+        return lockService.executeInBasketLock(user, () -> {
+            Basket innerCheck = repository.findFirstByUserIdAndStatusWithBasketContent(user.getId(), statuses);
+
+            if (innerCheck != null) {
+                return innerCheck;
+            }
+
+            return requireNewTransactionTemplate.execute(status -> {
+                Basket created = new Basket();
+                created.setStatus(Basket.Status.ACTIVE);
+                created.setUser(user);
+                return repository.save(created);
+            });
+        });
     }
 
     private Basket updateStock(User user, Basket basket, Basket.Status status) {
@@ -111,16 +145,29 @@ public class BasketService {
             lockBasketProducts(basket, locks);
 
             return requireNewTransactionTemplate.execute(x -> {
-                Basket innerBasket = getByUser(user);
+                Basket innerBasket = getUserBasket(user);
                 for (BasketProduct basketProduct : innerBasket.getProducts()) {
                     Product product = basketProduct.getProduct();
-                    product.setStockCount(product.getStockCount() + (multiplier * basketProduct.getCount()));
+                    long count = product.getStockCount() + (multiplier * basketProduct.getCount());
+                    if (multiplier < 0 && count < 0) {
+                        throw new StockNotEnoughException(String.format("Stock not enough for product %s", product.getId()));
+                    }
+
+                    product.setStockCount(count);
                 }
 
                 innerBasket.setStatus(status);
                 return repository.save(innerBasket);
             });
         } catch (Throwable e) {
+            if (e instanceof BaseIntegratorException) {
+                throw (BaseIntegratorException) e;
+            }
+
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+
             throw new RuntimeException(e);
         } finally {
             unlockAll(locks);
@@ -154,10 +201,6 @@ public class BasketService {
 
     }
 
-    public Basket getByUser(User user) {
-        return getUserBasket(user, true);
-    }
-
     private void lockBasketProducts(Basket basket, List<BLock> locks) throws InterruptedException {
         List<Long> productIds = basket.getProducts()
                 .stream()
@@ -167,9 +210,11 @@ public class BasketService {
 
         for (Long productId : productIds) {
             BLock lock = lockService.getProductLock(productId);
-            if (lock.tryLock(30, TimeUnit.SECONDS)) {
-                locks.add(lock);
+            if (!lock.tryLock(30, TimeUnit.SECONDS)) {
+                throw new CannotHoldTheLockException(String.format("Lock for product %s cannot hold in time interval", productId));
             }
+
+            locks.add(lock);
         }
     }
 
@@ -183,43 +228,5 @@ public class BasketService {
                 }
             }
         }
-    }
-
-    private Basket getUserBasket(User user) {
-        return getUserBasket(user, false);
-    }
-
-    private Basket getUserBasket(User user, boolean withDetails) {
-        List<Basket.Status> statuses = Arrays.asList(Basket.Status.ACTIVE, Basket.Status.STOCK_APPLIED);
-        Basket basket = withDetails ?
-                repository.findFirstByUserIdAndStatusWithBasketContent(user.getId(), statuses) :
-                repository.findFirstByUserIdAndStatusIn(user.getId(), statuses);
-
-        if (basket != null) {
-            return basket;
-        }
-
-        return lockService.executeInLock("basket-creation-lock:" + user.getId(), () -> {
-            Basket innerCheck = withDetails ?
-                    repository.findFirstByUserIdAndStatusWithBasketContent(user.getId(), statuses) :
-                    repository.findFirstByUserIdAndStatusIn(user.getId(), statuses);
-
-            if (innerCheck != null) {
-                return innerCheck;
-            }
-
-            return requireNewTransactionTemplate.execute(status -> {
-                Basket created = new Basket();
-                created.setStatus(Basket.Status.ACTIVE);
-                created.setUser(user);
-                return repository.save(created);
-            });
-        });
-    }
-
-    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    void complete(Basket basket) {
-        basket.setStatus(Basket.Status.COMPLETED);
-        repository.save(basket);
     }
 }

@@ -42,6 +42,11 @@ public class Product {
     private Status status;
     private BigDecimal price;
     private String barcode;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = LongText.class)
+    @MapKey(name = "columnName")
+    @JoinColumn(name = "record_id", foreignKey = @ForeignKey(name = "none"))
+    @Where(clause = "table_name = '" + TABLE_NAME + "'")
     private Map<String, LongText> longTexts = new HashMap<>();
 
     private User user;
@@ -132,18 +137,6 @@ public class Product {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = LongText.class)
-    @MapKey(name = "columnName")
-    @JoinColumn(name = "record_id", foreignKey = @ForeignKey(name = "none"))
-    @Where(clause = "table_name = '" + TABLE_NAME + "'")
-    public Map<String, LongText> getLongTexts() {
-        return longTexts;
-    }
-
-    public void setLongTexts(Map<String, LongText> longTexts) {
-        this.longTexts = longTexts;
     }
 
     @Transient

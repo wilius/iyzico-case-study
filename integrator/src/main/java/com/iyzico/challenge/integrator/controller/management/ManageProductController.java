@@ -42,7 +42,7 @@ public class ManageProductController {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public ProductDto create(@RequestBody @Validated CreateProductRequest request,
                              @ApiIgnore @IntegratorSession ApiSession session) {
-        return mapper.map(service.create(session.getUser(), request.getBarcode(), request.getName(), request.getStockCount(), request.getPrice(), request.getDescription()));
+        return mapper.mapWithDescription(service.create(session.getUser(), request.getBarcode(), request.getName(), request.getStockCount(), request.getPrice(), request.getDescription()));
     }
 
     @ApiOperation(
@@ -52,7 +52,7 @@ public class ManageProductController {
     @RequestMapping(method = RequestMethod.POST)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class)
     public ProductDto update(@RequestBody @Validated UpdateProductRequest request) {
-        return mapper.map(service.update(request.getId(), request.getBarcode(), request.getName(), request.getStockCount(), request.getPrice(), request.getDescription()));
+        return mapper.mapWithDescription(service.update(request.getId(), request.getBarcode(), request.getName(), request.getStockCount(), request.getPrice(), request.getDescription()));
     }
 
     @ApiOperation(
@@ -104,8 +104,7 @@ public class ManageProductController {
     @RequestMapping(value = "/all/unpublised", method = RequestMethod.GET)
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Throwable.class, readOnly = true)
     public ListResponse<ProductDto> getUnpublishedProducts() {
-        return new ListResponse<>(
-                mapper.map(service.getAllUnpublishedItems())
+        return new ListResponse<>(mapper.map(service.getAllUnpublishedItems())
         );
     }
 

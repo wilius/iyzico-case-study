@@ -20,12 +20,13 @@ public class UserOrderService {
     }
 
     @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
-    public void create(User user, UserPayment payment, Basket basket) {
+    public UserOrder create(User user, UserPayment payment, Basket basket) {
         UserOrder order = new UserOrder();
         order.setBasket(basket);
         order.setPayment(payment);
         order.setUser(user);
         order.setCreateTime(LocalDateTime.now());
         repository.save(order);
+        return order;
     }
 }

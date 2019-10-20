@@ -34,7 +34,7 @@ public class Basket {
     private Set<BasketProduct> products = new HashSet<>();
 
     public enum Status {
-        ACTIVE, STOCK_APPLIED, TIMEOUT, COMPLETED
+        ACTIVE, STOCK_APPLIED, COMPLETED
     }
 
     @Id

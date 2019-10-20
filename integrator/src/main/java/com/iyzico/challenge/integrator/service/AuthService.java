@@ -22,7 +22,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public User getUser(String username, String password) {
+    public User getUser(String username, String password) throws InvalidCredentialsException {
         try {
             User user = userService.getUserByUsername(username);
             if (Objects.equals(user.getPassword(), password) && user.isActive()) {
@@ -35,8 +35,6 @@ public class AuthService {
     }
 
     public void markAsLoggedIn(User user, String sessionKey) {
-        user.setLastLoginDate(LocalDateTime.now());
-        user.setLastSessionKey(sessionKey);
-        userService.updateUser(user);
+        userService.markAsLoggedIn(user, sessionKey);
     }
 }
