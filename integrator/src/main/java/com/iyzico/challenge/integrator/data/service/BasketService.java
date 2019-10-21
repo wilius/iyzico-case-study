@@ -5,13 +5,14 @@ import com.iyzico.challenge.integrator.data.entity.BasketProduct;
 import com.iyzico.challenge.integrator.data.entity.Product;
 import com.iyzico.challenge.integrator.data.entity.User;
 import com.iyzico.challenge.integrator.data.repository.BasketRepository;
-import com.iyzico.challenge.integrator.exception.BaseIntegratorException;
 import com.iyzico.challenge.integrator.exception.EmptyBasketException;
 import com.iyzico.challenge.integrator.exception.InvalidBasketStatusException;
 import com.iyzico.challenge.integrator.exception.StockNotEnoughException;
 import com.iyzico.challenge.integrator.service.hazelcast.BLock;
 import com.iyzico.challenge.integrator.service.hazelcast.LockService;
 import com.iyzico.challenge.integrator.service.hazelcast.exception.CannotHoldTheLockException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class BasketService {
+    private final Logger log = LoggerFactory.getLogger(BasketService.class);
     private final BasketRepository repository;
 
     private final ProductService productService;
@@ -143,7 +145,12 @@ public class BasketService {
 
         try {
             lockBasketProducts(basket, locks);
+        } catch (CannotHoldTheLockException e) {
+            unlockAll(locks);
+            throw e;
+        }
 
+        try {
             return requireNewTransactionTemplate.execute(x -> {
                 Basket innerBasket = getUserBasket(user);
                 for (BasketProduct basketProduct : innerBasket.getProducts()) {
@@ -159,16 +166,6 @@ public class BasketService {
                 innerBasket.setStatus(status);
                 return repository.save(innerBasket);
             });
-        } catch (Throwable e) {
-            if (e instanceof BaseIntegratorException) {
-                throw (BaseIntegratorException) e;
-            }
-
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-
-            throw new RuntimeException(e);
         } finally {
             unlockAll(locks);
         }
@@ -201,7 +198,7 @@ public class BasketService {
 
     }
 
-    private void lockBasketProducts(Basket basket, List<BLock> locks) throws InterruptedException {
+    private void lockBasketProducts(Basket basket, List<BLock> locks) throws CannotHoldTheLockException {
         List<Long> productIds = basket.getProducts()
                 .stream()
                 .map(BasketProduct::getProductId)
@@ -209,13 +206,23 @@ public class BasketService {
                 .collect(Collectors.toList());
 
         for (Long productId : productIds) {
+            log.trace("Trying to get lock for productId {}", productId);
             BLock lock = lockService.getProductLock(productId);
-            if (!lock.tryLock(30, TimeUnit.SECONDS)) {
-                throw new CannotHoldTheLockException(String.format("Lock for product %s cannot hold in time interval", productId));
+            try {
+                if (!lock.tryLock(30, TimeUnit.SECONDS)) {
+                    log.trace("Lock could not hold for productId {}", productId);
+                    throw new CannotHoldTheLockException(String.format("Lock for product %s cannot hold in time interval", productId));
+                }
+            } catch (InterruptedException e) {
+                log.trace("Unexpected exception while trying to get lock for productId {}", productId, e);
+                throw new CannotHoldTheLockException(e);
             }
 
+            log.trace("Lock held successfully for productId {}", productId);
             locks.add(lock);
         }
+
+        log.trace("All product locks held for basket {}", basket.getId());
     }
 
     private void unlockAll(List<BLock> locks) {
@@ -223,8 +230,15 @@ public class BasketService {
             for (int i = 0; i < 10; i++) {
                 try {
                     lock.unlock();
+                    log.trace("Lock {} successfully released", lock.getName());
                     break;
-                } catch (Throwable ignored) {
+                } catch (Throwable e) {
+
+                    if (i == 9) {
+                        log.warn("Cannot release the lock after 10 retries. lockKey: " + lock.getName(), e);
+                    } else {
+                        log.trace("Unexpected exception during unlock of key " + lock.getName(), e);
+                    }
                 }
             }
         }

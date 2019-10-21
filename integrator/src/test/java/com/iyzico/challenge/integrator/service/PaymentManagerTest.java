@@ -502,11 +502,6 @@ public class PaymentManagerTest {
                 }
 
                 called.set(true);
-                Assert.assertEquals("TR", request.getLocale());
-                Assert.assertEquals("TRY", request.getCurrency());
-                Assert.assertEquals(digits, request.getBinNumber());
-                Assert.assertEquals(basketTotal, request.getPrice());
-                Assert.assertEquals(String.valueOf(basketId), request.getConversationId());
                 return info.get();
             }
         }.getMockInstance();
@@ -597,11 +592,6 @@ public class PaymentManagerTest {
                 }
 
                 called.set(true);
-                Assert.assertEquals("TR", request.getLocale());
-                Assert.assertEquals("TRY", request.getCurrency());
-                Assert.assertEquals(digits, request.getBinNumber());
-                Assert.assertEquals(basketTotal, request.getPrice());
-                Assert.assertEquals(String.valueOf(basketId), request.getConversationId());
                 return info.get();
             }
         }.getMockInstance();
@@ -689,11 +679,6 @@ public class PaymentManagerTest {
                 }
 
                 called.set(true);
-                Assert.assertEquals("TR", request.getLocale());
-                Assert.assertEquals("TRY", request.getCurrency());
-                Assert.assertEquals(digits, request.getBinNumber());
-                Assert.assertEquals(basketTotal, request.getPrice());
-                Assert.assertEquals(String.valueOf(basketId), request.getConversationId());
                 return info.get();
             }
         }.getMockInstance();
@@ -746,10 +731,10 @@ public class PaymentManagerTest {
     }
 
     @Test(expected = PaymentException.class)
-    public void pay_ExceptionDuringPayment(@Mocked Basket basket,
-                                           @Mocked Lock lock,
-                                           @Mocked UserPayment payment,
-                                           @Mocked Payment paymentResponse) {
+    public void pay_ServiceExceptionDuringPayment(@Mocked Basket basket,
+                                                  @Mocked Lock lock,
+                                                  @Mocked UserPayment payment,
+                                                  @Mocked Payment paymentResponse) {
 
         String holderName = "holderName";
         String cardNumber = "cardNumber";
@@ -798,11 +783,6 @@ public class PaymentManagerTest {
                 }
 
                 called.set(true);
-                Assert.assertEquals("TR", request.getLocale());
-                Assert.assertEquals("TRY", request.getCurrency());
-                Assert.assertEquals(digits, request.getBinNumber());
-                Assert.assertEquals(basketTotal, request.getPrice());
-                Assert.assertEquals(String.valueOf(basketId), request.getConversationId());
                 return info.get();
             }
         }.getMockInstance();
@@ -919,6 +899,468 @@ public class PaymentManagerTest {
         } finally {
             Assert.assertTrue(called.get());
         }
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void pay_UnexpectedExceptionDuringPayment(@Mocked Basket basket,
+                                                     @Mocked Lock lock,
+                                                     @Mocked UserPayment payment,
+                                                     @Mocked Payment paymentResponse) {
+
+        String holderName = "holderName";
+        String cardNumber = "cardNumber";
+        YearMonth expire = YearMonth.now();
+        String cvc = "cvc";
+        String ip = "ip";
+        int installment = 1;
+
+        User user = createUser();
+        UserProfile profile = user.getProfile();
+        long userProfileId = profile.getId();
+
+        long basketId = 2;
+        BigDecimal basketTotal = BigDecimal.TEN;
+        Callable<Basket> callable = () -> null;
+        threadLocal.set(lock);
+
+        long productId = Long.MAX_VALUE - 3;
+        String productName = "productName";
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setName(productName);
+        product.setPrice(BigDecimal.TEN);
+
+        BasketProduct basketProduct = new BasketProduct();
+        basketProduct.setProductId(productId);
+        basketProduct.setProduct(product);
+        basketProduct.setCount(1);
+
+        InstallmentDetail detail = new InstallmentDetail();
+        InstallmentPrice price = new InstallmentPrice();
+        price.setInstallmentNumber(installment);
+        price.setInstallmentPrice(basketTotal);
+        price.setTotalPrice(basketTotal);
+        detail.setInstallmentPrices(Collections.singletonList(price));
+
+        AtomicBoolean called = new AtomicBoolean(false);
+        AtomicReference<InstallmentInfo> info = new AtomicReference<>();
+        InstallmentInfo mock = new MockUp<InstallmentInfo>() {
+            @Mock
+            InstallmentInfo retrieve(RetrieveInstallmentInfoRequest request, Options options) {
+                if (request == null) {
+                    return null;
+                }
+
+                called.set(true);
+                return info.get();
+            }
+        }.getMockInstance();
+
+        info.set(mock);
+        mock.setStatus("success");
+        mock.setInstallmentDetails(Collections.singletonList(detail));
+
+        Set<BasketProduct> products = Collections.singleton(basketProduct);
+        new NonStrictExpectations() {{
+            basket.getTotal();
+            result = basketTotal;
+
+            basket.getId();
+            result = basketId;
+
+            basket.getProducts();
+            result = products;
+
+            paymentResponse.getStatus();
+            result = "success";
+        }};
+
+        AtomicBoolean paymentCheckCalled = new AtomicBoolean(false);
+        new StrictExpectations() {{
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            userService.getProfileById(userProfileId);
+            result = profile;
+
+            basketService.getUserBasket(user);
+            result = basket;
+
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            lock.unlock();
+
+            basketService.decreaseStocks(user, basket);
+            result = basket;
+
+            paymentService.startPayment(user, basket);
+            result = payment;
+
+            Payment.create(with(new Delegate<CreatePaymentRequest>() {
+                public boolean matches(CreatePaymentRequest request) {
+                    paymentCheckCalled.set(true);
+                    return true;
+                }
+            }), options);
+            result = new RuntimeException();
+
+            paymentService.markAsFailure(payment, anyString);
+
+            lock.unlock();
+        }};
+
+        try {
+            tested.pay(user, holderName, cardNumber, expire, cvc, ip, installment);
+        } finally {
+            Assert.assertTrue(called.get());
+        }
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void pay_UnexpectedExceptionDuringMarkingPaymentFailure(@Mocked Basket basket,
+                                                                   @Mocked Lock lock,
+                                                                   @Mocked UserPayment payment,
+                                                                   @Mocked Payment paymentResponse) {
+
+        String holderName = "holderName";
+        String cardNumber = "cardNumber";
+        YearMonth expire = YearMonth.now();
+        String cvc = "cvc";
+        String ip = "ip";
+        int installment = 1;
+
+        User user = createUser();
+        UserProfile profile = user.getProfile();
+        long userProfileId = profile.getId();
+
+        long basketId = 2;
+        BigDecimal basketTotal = BigDecimal.TEN;
+        Callable<Basket> callable = () -> null;
+        threadLocal.set(lock);
+
+        long productId = Long.MAX_VALUE - 3;
+        String productName = "productName";
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setName(productName);
+        product.setPrice(BigDecimal.TEN);
+
+        BasketProduct basketProduct = new BasketProduct();
+        basketProduct.setProductId(productId);
+        basketProduct.setProduct(product);
+        basketProduct.setCount(1);
+
+        InstallmentDetail detail = new InstallmentDetail();
+        InstallmentPrice price = new InstallmentPrice();
+        price.setInstallmentNumber(installment);
+        price.setInstallmentPrice(basketTotal);
+        price.setTotalPrice(basketTotal);
+        detail.setInstallmentPrices(Collections.singletonList(price));
+
+        AtomicBoolean called = new AtomicBoolean(false);
+        AtomicReference<InstallmentInfo> info = new AtomicReference<>();
+        InstallmentInfo mock = new MockUp<InstallmentInfo>() {
+            @Mock
+            InstallmentInfo retrieve(RetrieveInstallmentInfoRequest request, Options options) {
+                if (request == null) {
+                    return null;
+                }
+
+                called.set(true);
+                return info.get();
+            }
+        }.getMockInstance();
+
+        info.set(mock);
+        mock.setStatus("success");
+        mock.setInstallmentDetails(Collections.singletonList(detail));
+
+        Set<BasketProduct> products = Collections.singleton(basketProduct);
+        new NonStrictExpectations() {{
+            basket.getTotal();
+            result = basketTotal;
+
+            basket.getId();
+            result = basketId;
+
+            basket.getProducts();
+            result = products;
+
+            paymentResponse.getStatus();
+            result = "success";
+        }};
+
+        AtomicBoolean paymentCheckCalled = new AtomicBoolean(false);
+        new StrictExpectations() {{
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            userService.getProfileById(userProfileId);
+            result = profile;
+
+            basketService.getUserBasket(user);
+            result = basket;
+
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            lock.unlock();
+
+            basketService.decreaseStocks(user, basket);
+            result = basket;
+
+            paymentService.startPayment(user, basket);
+            result = payment;
+
+            Payment.create(with(new Delegate<CreatePaymentRequest>() {
+                public boolean matches(CreatePaymentRequest request) {
+                    paymentCheckCalled.set(true);
+                    return true;
+                }
+            }), options);
+            result = new Throwable();
+
+            paymentService.markAsFailure(payment, anyString);
+            result = new RuntimeException();
+
+            lock.unlock();
+        }};
+
+        try {
+            tested.pay(user, holderName, cardNumber, expire, cvc, ip, installment);
+        } finally {
+            Assert.assertTrue(called.get());
+        }
+    }
+
+    @Test
+    public void pay_UnexpectedExceptionDuringMarkingPaymentSuccessfull(@Mocked Basket basket,
+                                                                       @Mocked Lock lock,
+                                                                       @Mocked UserPayment payment,
+                                                                       @Mocked Payment paymentResponse) {
+
+        String holderName = "holderName";
+        String cardNumber = "cardNumber";
+        YearMonth expire = YearMonth.now();
+        String cvc = "cvc";
+        String ip = "ip";
+        int installment = 1;
+
+        User user = createUser();
+        UserProfile profile = user.getProfile();
+        long userProfileId = profile.getId();
+
+        long basketId = 2;
+        BigDecimal basketTotal = BigDecimal.TEN;
+        Callable<Basket> callable = () -> null;
+        threadLocal.set(lock);
+
+        long productId = Long.MAX_VALUE - 3;
+        String productName = "productName";
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setName(productName);
+        product.setPrice(BigDecimal.TEN);
+
+        BasketProduct basketProduct = new BasketProduct();
+        basketProduct.setProductId(productId);
+        basketProduct.setProduct(product);
+        basketProduct.setCount(1);
+
+        InstallmentDetail detail = new InstallmentDetail();
+        InstallmentPrice price = new InstallmentPrice();
+        price.setInstallmentNumber(installment);
+        price.setInstallmentPrice(basketTotal);
+        price.setTotalPrice(basketTotal);
+        detail.setInstallmentPrices(Collections.singletonList(price));
+
+        AtomicBoolean called = new AtomicBoolean(false);
+        AtomicReference<InstallmentInfo> info = new AtomicReference<>();
+        InstallmentInfo mock = new MockUp<InstallmentInfo>() {
+            @Mock
+            InstallmentInfo retrieve(RetrieveInstallmentInfoRequest request, Options options) {
+                if (request == null) {
+                    return null;
+                }
+
+                called.set(true);
+                return info.get();
+            }
+        }.getMockInstance();
+
+        info.set(mock);
+        mock.setStatus("success");
+        mock.setInstallmentDetails(Collections.singletonList(detail));
+
+        Set<BasketProduct> products = Collections.singleton(basketProduct);
+        new NonStrictExpectations() {{
+            basket.getTotal();
+            result = basketTotal;
+
+            basket.getId();
+            result = basketId;
+
+            basket.getProducts();
+            result = products;
+
+            paymentResponse.getStatus();
+            result = "success";
+        }};
+
+        AtomicBoolean paymentCheckCalled = new AtomicBoolean(false);
+        new StrictExpectations() {{
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            userService.getProfileById(userProfileId);
+            result = profile;
+
+            basketService.getUserBasket(user);
+            result = basket;
+
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            lock.unlock();
+
+            basketService.decreaseStocks(user, basket);
+            result = basket;
+
+            paymentService.startPayment(user, basket);
+            result = payment;
+
+            Payment.create(with(new Delegate<CreatePaymentRequest>() {
+                public boolean matches(CreatePaymentRequest request) {
+                    paymentCheckCalled.set(true);
+                    return true;
+                }
+            }), options);
+            result = paymentResponse;
+
+            paymentService.markAsSuccess(user, payment, basket, paymentResponse);
+            result = new RuntimeException();
+
+            lock.unlock();
+        }};
+
+        try {
+            tested.pay(user, holderName, cardNumber, expire, cvc, ip, installment);
+        } finally {
+            Assert.assertTrue(called.get());
+        }
+    }
+
+    @Test
+    public void pay(@Mocked Basket basket,
+                    @Mocked Lock lock,
+                    @Mocked UserPayment payment,
+                    @Mocked Payment paymentResponse) {
+
+        String holderName = "holderName";
+        String cardNumber = "cardNumber";
+        YearMonth expire = YearMonth.now();
+        String cvc = "cvc";
+        String ip = "ip";
+        int installment = 1;
+
+        User user = createUser();
+        UserProfile profile = user.getProfile();
+        long userProfileId = profile.getId();
+
+        long basketId = 2;
+        BigDecimal basketTotal = BigDecimal.TEN;
+        Callable<Basket> callable = () -> null;
+        threadLocal.set(lock);
+
+        long productId = Long.MAX_VALUE - 3;
+        String productName = "productName";
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setName(productName);
+        product.setPrice(BigDecimal.TEN);
+
+        BasketProduct basketProduct = new BasketProduct();
+        basketProduct.setProductId(productId);
+        basketProduct.setProduct(product);
+        basketProduct.setCount(1);
+
+        InstallmentDetail detail = new InstallmentDetail();
+        InstallmentPrice price = new InstallmentPrice();
+        price.setInstallmentNumber(installment);
+        price.setInstallmentPrice(basketTotal);
+        price.setTotalPrice(basketTotal);
+        detail.setInstallmentPrices(Collections.singletonList(price));
+
+        AtomicBoolean called = new AtomicBoolean(false);
+        AtomicReference<InstallmentInfo> info = new AtomicReference<>();
+        InstallmentInfo mock = new MockUp<InstallmentInfo>() {
+            @Mock
+            InstallmentInfo retrieve(RetrieveInstallmentInfoRequest request, Options options) {
+                if (request == null) {
+                    return null;
+                }
+
+                called.set(true);
+                return info.get();
+            }
+        }.getMockInstance();
+
+        info.set(mock);
+        mock.setStatus("success");
+        mock.setInstallmentDetails(Collections.singletonList(detail));
+
+        Set<BasketProduct> products = Collections.singleton(basketProduct);
+        new NonStrictExpectations() {{
+            basket.getTotal();
+            result = basketTotal;
+
+            basket.getId();
+            result = basketId;
+
+            basket.getProducts();
+            result = products;
+
+            paymentResponse.getStatus();
+            result = "success";
+        }};
+
+        AtomicBoolean paymentCheckCalled = new AtomicBoolean(false);
+        new StrictExpectations() {{
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            userService.getProfileById(userProfileId);
+            result = profile;
+
+            basketService.getUserBasket(user);
+            result = basket;
+
+            lockService.executeInBasketLock(user, withInstanceLike(callable));
+
+            lock.unlock();
+
+            basketService.decreaseStocks(user, basket);
+            result = basket;
+
+            paymentService.startPayment(user, basket);
+            result = payment;
+
+            Payment.create(with(new Delegate<CreatePaymentRequest>() {
+                public boolean matches(CreatePaymentRequest request) {
+                    paymentCheckCalled.set(true);
+                    return true;
+                }
+            }), options);
+            result = paymentResponse;
+
+            paymentService.markAsSuccess(user, payment, basket, paymentResponse);
+
+            lock.unlock();
+        }};
+
+        Payment result = tested.pay(user, holderName, cardNumber, expire, cvc, ip, installment);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(paymentResponse, result);
+        Assert.assertTrue(called.get());
+        Assert.assertTrue(paymentCheckCalled.get());
     }
 
     private User createUser() {

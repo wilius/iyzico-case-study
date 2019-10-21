@@ -26,11 +26,13 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
 
         if (session == null) {
             if (!security.isAllowAnonymous()) {
+                log.trace("Endpoint is secured and not allows the anonymous users");
                 throw new AuthorizationException("Session not found");
             }
         } else {
             if (security.requireAdminPermission()) {
                 if (!session.getUser().isAdmin()) {
+                    log.trace("Endpoint requires admin privilages and User {} is not admin", session.getUser().getId());
                     throw new AuthorizationException("Not authorized");
                 }
             }

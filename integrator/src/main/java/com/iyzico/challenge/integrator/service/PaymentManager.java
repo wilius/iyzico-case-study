@@ -144,7 +144,7 @@ public class PaymentManager {
             try {
                 paymentService.markAsFailure(payment, t.getMessage());
             } catch (Throwable t2) {
-                // send a notification to manually solve the problem
+                // send a notification to check and manually solve the problem
                 log.warn("Unexpected exception while marking payment as failure", t2);
                 throw t2;
             }
@@ -155,7 +155,7 @@ public class PaymentManager {
         try {
             paymentService.markAsSuccess(user, payment, basket, response);
         } catch (Throwable t) {
-            // send a notification to manually solve the problem
+            // send a notification to manually solve the problem or queue it to retry
             log.warn("Unexpected exception occurred during the payment", t);
         }
 

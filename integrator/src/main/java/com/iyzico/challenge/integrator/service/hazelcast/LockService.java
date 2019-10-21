@@ -31,7 +31,7 @@ public class LockService {
     }
 
     public <T> T executeInBasketLock(User user, Callable<T> callable) {
-        return executeInLock("basket-lock:" + user.getId(), callable);
+        return executeInLock("basket-" + user.getId(), callable);
     }
 
     public <T> T executeInLock(String key, Callable<T> task) {

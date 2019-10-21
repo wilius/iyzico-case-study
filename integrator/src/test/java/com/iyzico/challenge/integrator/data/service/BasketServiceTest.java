@@ -357,6 +357,14 @@ public class BasketServiceTest {
         basket.setStatus(Basket.Status.ACTIVE);
         basket.setProducts(products);
 
+        new NonStrictExpectations() {{
+            lock1.getName();
+            result = "lock1";
+
+            lock2.getName();
+            result = "lock2";
+        }};
+
         new StrictExpectations(lockService) {{
             lockService.getProductLock(productId2);
             result = lock1;
@@ -399,6 +407,14 @@ public class BasketServiceTest {
         Basket basket = new Basket();
         basket.setStatus(Basket.Status.ACTIVE);
         basket.setProducts(products);
+
+        new NonStrictExpectations() {{
+            lock1.getName();
+            result = "lock1";
+
+            lock2.getName();
+            result = "lock2";
+        }};
 
         TransactionCallback<Basket> transactionCallback = status -> null;
         new StrictExpectations(lockService, tested, basket) {{
@@ -457,6 +473,12 @@ public class BasketServiceTest {
 
             basket.getProducts();
             result = products;
+
+            lock1.getName();
+            result = "lock1";
+
+            lock2.getName();
+            result = "lock2";
         }};
 
         new StrictExpectations(lockService, basket) {{
@@ -548,6 +570,14 @@ public class BasketServiceTest {
         basket.setStatus(Basket.Status.ACTIVE);
         basket.setProducts(products);
 
+        new NonStrictExpectations() {{
+            lock1.getName();
+            result = "lock1";
+
+            lock2.getName();
+            result = "lock2";
+        }};
+
         new StrictExpectations(lockService) {{
             lockService.getProductLock(productId2);
             result = lock1;
@@ -600,6 +630,12 @@ public class BasketServiceTest {
 
             basket.getProducts();
             result = products;
+
+            lock1.getName();
+            result = "lock1";
+
+            lock2.getName();
+            result = "lock2";
         }};
 
         new StrictExpectations(lockService, basket) {{
