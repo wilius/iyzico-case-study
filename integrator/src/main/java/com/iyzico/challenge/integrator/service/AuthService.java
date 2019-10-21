@@ -25,7 +25,7 @@ public class AuthService {
     public User getUser(String username, String password) throws InvalidCredentialsException {
         try {
             User user = userService.getUserByUsername(username);
-            if (Objects.equals(user.getPassword(), password) && user.isActive()) {
+            if (user != null && Objects.equals(user.getPassword(), password) && user.isActive()) {
                 return user;
             }
         } catch (BaseIntegratorException ignored) {

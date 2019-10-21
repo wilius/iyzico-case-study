@@ -106,6 +106,7 @@ public class PaymentManager {
         UserProfile profile;
         InstallmentPrice installment;
         UserPayment payment;
+        boolean decreased = false;
         try {
             log.info("Getting profile with id {}", user.getUserProfileId());
             // due to lazy loading exception
@@ -117,11 +118,12 @@ public class PaymentManager {
 
             log.info("Starting to decrease stocks for user {}", user.getId());
             basket = basketService.decreaseStocks(user, basket);
+            decreased = true;
 
             payment = paymentService.startPayment(user, basket);
         } catch (Throwable t) {
             log.warn("Unexpected exception during the initialization of the payment", t);
-            if (basket != null) {
+            if (decreased) {
                 try {
                     basketService.rollbackStocks(user, basket);
                 } catch (Throwable t2) {

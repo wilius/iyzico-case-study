@@ -21,7 +21,7 @@ public class UserSession {
         this.lastLogin = lastLogin;
     }
 
-    String getSessionKey() {
+    public String getSessionKey() {
         if (invalidated) {
             return null;
         }
@@ -34,12 +34,12 @@ public class UserSession {
         return user;
     }
 
-    LocalDateTime getLastLoginDate() {
+    public LocalDateTime getLastLoginDate() {
         checkInvalidated();
         return lastLogin;
     }
 
-    LocalDateTime getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         checkInvalidated();
         return createdAt;
     }
